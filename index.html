@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Suivi Maintenance — Geenen / Genicot</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#111110;--bg2:#1a1a18;--bg3:#222220;--bg4:#2a2a28;--tx:#e8e8e6;--tx2:#9a9a96;--tx3:#5a5a56;--bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.14);--bd3:rgba(255,255,255,0.22);--r:8px;--rl:12px;--tm:#5DCAA5;--tmbg:#04342C;--tmdk:#9FE1CB;--tc:#F0997B;--tcbg:#4A1B0C;--tcdk:#F5C4B3;--tv:#85B7EB;--tvbg:#042C53;--tvdk:#B5D4F4;}
@@ -919,245 +918,249 @@ function renderItems(){
 /* ══════════════════════════════════════
    FICHE TECHNIQUE PDF
 ══════════════════════════════════════ */
-async function genFichePDF(id) {
+function genFichePDF(id) {
   const it = items.find(i => i.id === id);
   if (!it) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const W = 210, M = 16, CW = W - M * 2;
-  let y = 0;
-
-  const PAL = { maison: [93,202,165], moto: [240,153,123], voiture: [133,183,235] };
-  const col = PAL[it.category] || [150,150,150];
-
-  // Charger la photo en base64 (base64 directe ou URL externe)
-  let imgData = null;
-  if (it.image) {
-    if (it.image.startsWith('data:image')) {
-      imgData = it.image;
-    } else {
-      // URL externe → charger via canvas
-      try {
-        imgData = await new Promise((resolve) => {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => {
-            const c = document.createElement('canvas');
-            c.width = img.naturalWidth; c.height = img.naturalHeight;
-            c.getContext('2d').drawImage(img, 0, 0);
-            resolve(c.toDataURL('image/jpeg', 0.85));
-          };
-          img.onerror = () => resolve(null);
-          img.src = it.image;
-        });
-      } catch(e) { imgData = null; }
-    }
-  }
-
-  // Bandeau couleur haut
-  doc.setFillColor(...col);
-  doc.rect(0, 0, W, 18, 'F');
-
-  // Titre
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(14);
-  doc.setTextColor(255,255,255);
-  doc.text('FICHE TECHNIQUE', M, 11);
-  doc.setFontSize(9);
-  doc.setFont('helvetica','normal');
-  doc.text(LBL[it.category].toUpperCase(), W - M, 11, { align:'right' });
-  y = 26;
-
-  // Photo + Nom (côte à côte si photo disponible)
-  const IMG_W = 38, IMG_H = 38, IMG_X = W - M - IMG_W;
-  if (imgData) {
-    try {
-      const fmt = imgData.includes('data:image/png') ? 'PNG' : 'JPEG';
-      doc.addImage(imgData, fmt, IMG_X, y - 6, IMG_W, IMG_H, undefined, 'FAST');
-      doc.setDrawColor(...col);
-      doc.setLineWidth(0.5);
-      doc.rect(IMG_X, y - 6, IMG_W, IMG_H);
-    } catch(e) { /* image ignorée si erreur */ }
-  }
-
-  // Nom de l'appareil
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(18);
-  doc.setTextColor(30,30,30);
-  doc.text(it.name, M, y);
-  y += 6;
-
-  // Date génération
-  doc.setFont('helvetica','italic');
-  doc.setFontSize(8);
-  doc.setTextColor(140,140,140);
-  doc.text('Généré le ' + new Date().toLocaleDateString('fr-BE', {day:'2-digit',month:'long',year:'numeric'}), M, y);
-  y += 8;
-  // Si photo présente, s'assurer qu'on descend assez pour ne pas chevaucher
-  if (imgData) y = Math.max(y, 40);
-
-  // Ligne séparatrice
-  doc.setDrawColor(...col);
-  doc.setLineWidth(0.6);
-  doc.line(M, y, W - M, y);
-  y += 7;
-
-  // Fonction section
-  function section(title) {
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(8);
-    doc.setTextColor(...col);
-    doc.text(title.toUpperCase(), M, y);
-    y += 1.5;
-    doc.setDrawColor(...col);
-    doc.setLineWidth(0.3);
-    doc.line(M, y, M + CW, y);
-    y += 5;
-    doc.setTextColor(30,30,30);
-  }
-
-  function row(label, value, right) {
-    if (!value) return;
-    const xL = right ? M + CW/2 + 2 : M;
-    if (!right) {
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(8);
-      doc.setTextColor(100,100,100);
-      doc.text(label, xL, y);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(9);
-      doc.setTextColor(30,30,30);
-      doc.text(String(value), xL + 38, y);
-    } else {
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(8);
-      doc.setTextColor(100,100,100);
-      doc.text(label, xL, y);
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(9);
-      doc.setTextColor(30,30,30);
-      doc.text(String(value), xL + 38, y);
-    }
-  }
-
-  // Deux colonnes côte à côte
-  function twoRows(l1, v1, l2, v2) {
-    const yBefore = y;
-    if (v1) {
-      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(100,100,100);
-      doc.text(l1, M, y);
-      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
-      doc.text(String(v1), M + 40, y);
-    }
-    if (v2) {
-      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(100,100,100);
-      doc.text(l2, M + CW/2, y);
-      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
-      doc.text(String(v2), M + CW/2 + 40, y);
-    }
-    if (v1 || v2) y += 6;
-  }
-
-  function oneRow(label, value) {
-    if (!value) return;
-    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(100,100,100);
-    doc.text(label, M, y);
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
-    doc.text(String(value), M + 40, y);
-    y += 6;
-  }
-
-  // ── Identification ──
-  section('Identification');
   const veh = isVeh(it.category);
-  twoRows('Catégorie', LBL[it.category], 'Contrat', it.contract ? 'Oui' : 'Non');
-  if (veh) {
-    twoRows('Plaque', it.plate || '—', 'VIN / Châssis', it.vin || '—');
-  } else {
-    oneRow('N° de série', it.serial || '—');
-  }
-
-  // ── Maintenance ──
-  section('Maintenance');
-  twoRows('Dernière maintenance', fd(it.lastDate), 'Prochaine maintenance', fd(it.nextDate));
-  if (veh && it.km != null) {
-    oneRow('Kilométrage actuel', it.km.toLocaleString('fr-BE') + ' km');
-  }
-
-  // ── Contact ──
-  if (it.cname || it.cphone || it.cemail) {
-    section('Contact garage / technicien');
-    twoRows('Nom', it.cname || '—', 'Téléphone', it.cphone || '—');
-    oneRow('E-mail', it.cemail || '—');
-  }
-
-  // ── Notes ──
-  if (it.notes) {
-    section('Notes');
-    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
-    const lines = doc.splitTextToSize(it.notes, CW);
-    doc.text(lines, M, y);
-    y += lines.length * 5 + 4;
-  }
-
-  // ── Historique ──
-  const hist = (it.history || []).sort((a, b) => new Date(b.date) - new Date(a.date));
-  if (hist.length) {
-    section('Historique des entretiens');
-    // En-tête tableau
-    const cols = veh
-      ? [{lbl:'Date',x:M,w:28},{lbl:'Description',x:M+28,w:60},{lbl:'Type',x:M+88,w:22},{lbl:'KM',x:M+110,w:22},{lbl:'Coût',x:M+132,w:22},{lbl:'Prochaine',x:M+154,w:34}]
-      : [{lbl:'Date',x:M,w:28},{lbl:'Description',x:M+28,w:90},{lbl:'Coût',x:M+118,w:22},{lbl:'Prochaine',x:M+140,w:38}];
-    doc.setFillColor(245,245,245);
-    doc.rect(M, y-4, CW, 6, 'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(80,80,80);
-    cols.forEach(c => doc.text(c.lbl, c.x + 1, y));
-    y += 4;
-    doc.setLineWidth(0.2); doc.setDrawColor(200,200,200);
-    doc.line(M, y, M + CW, y);
-    y += 4;
-    hist.forEach((e, i) => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(30,30,30);
-      const TLBL = {entretien:'Entretien',reparation:'Réparation',ct:'CT'};
-      if (veh) {
-        doc.text(fd(e.date), cols[0].x+1, y);
-        const desc = doc.splitTextToSize(e.description||'—', cols[1].w-2);
-        doc.text(desc[0], cols[1].x+1, y);
-        doc.text(TLBL[e.type||'entretien']||'', cols[2].x+1, y);
-        doc.text(e.km!=null ? e.km.toLocaleString('fr-BE') : '—', cols[3].x+1, y);
-        doc.text(e.cost!=null ? e.cost+'€' : '—', cols[4].x+1, y);
-        doc.text(fd(e.nextDate), cols[5].x+1, y);
-      } else {
-        doc.text(fd(e.date), cols[0].x+1, y);
-        const desc = doc.splitTextToSize(e.description||'—', cols[1].w-2);
-        doc.text(desc[0], cols[1].x+1, y);
-        doc.text(e.cost!=null ? e.cost+'€' : '—', cols[2].x+1, y);
-        doc.text(fd(e.nextDate), cols[3].x+1, y);
-      }
-      y += 6;
-      if (i < hist.length-1) { doc.setDrawColor(230,230,230); doc.line(M, y-2, M+CW, y-2); }
-    });
-    y += 3;
-  }
-
-  // ── Documents ──
+  const prof = getProfile();
+  const hist = (it.history || []).sort((a,b) => new Date(b.date)-new Date(a.date));
   const docs = it.docs || [];
-  if (docs.length) {
-    section('Documents techniques joints');
-    docs.forEach(d => {
-      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(30,30,30);
-      doc.text('• ' + d.name, M + 2, y);
-      y += 5;
-    });
-    y += 2;
+  const ACCENT = { maison:'#5DCAA5', moto:'#F0997B', voiture:'#85B7EB' };
+  const accent = ACCENT[it.category] || '#888';
+  const dateStr = new Date().toLocaleDateString('fr-BE',{day:'2-digit',month:'long',year:'numeric'});
+  const TLBL = {entretien:'Entretien',reparation:'Réparation',ct:'Contrôle Technique'};
+
+  function row(label, val) {
+    if (!val) return '';
+    return `<div class="row"><span class="lbl">${label}</span><span class="val">${val}</span></div>`;
   }
 
-  // Pied de page
-  doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(180,180,180);
-  doc.text('Suivi Maintenance — Geenen / Genicot · Rue Mont-Plaisir 25, 1430 Bierghes', W/2, 292, {align:'center'});
+  const histRows = hist.map((e,i) => `
+    <tr class="${i%2===1?'alt':''}">
+      <td>${fd(e.date)}</td>
+      <td>${e.description||'—'}</td>
+      ${veh ? `<td>${TLBL[e.type||'entretien']||'Entretien'}</td>` : ''}
+      ${veh ? `<td>${e.km!=null?e.km.toLocaleString('fr-BE')+' km':'—'}</td>` : ''}
+      <td>${e.cost!=null?e.cost.toLocaleString('fr-BE',{style:'currency',currency:'EUR'}):'—'}</td>
+      <td>${fd(e.nextDate)}</td>
+    </tr>`).join('');
 
-  doc.save(`fiche-${it.name.replace(/\s+/g,'-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Fiche — ${it.name}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  @page{size:A4;margin:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+    background:#111110;color:#e8e8e6;font-size:13px;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+
+  /* ── HEADER ── */
+  .header{
+    background:#111110;
+    border-bottom:3px solid ${accent};
+    display:flex;align-items:stretch;
+    min-height:180px;
+    page-break-inside:avoid;
+  }
+  .header-left{
+    flex:1;padding:32px 36px;display:flex;flex-direction:column;justify-content:center;
+  }
+  .header-eyebrow{
+    font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+    color:${accent};margin-bottom:10px;display:flex;align-items:center;gap:8px;
+  }
+  .header-eyebrow::before{content:'';display:inline-block;width:24px;height:2px;background:${accent};}
+  .header-name{font-size:32px;font-weight:700;color:#fff;letter-spacing:-.5px;line-height:1.1;margin-bottom:6px;}
+  .header-date{font-size:11px;color:#5a5a56;margin-top:8px;}
+  .header-photo{
+    width:200px;flex-shrink:0;overflow:hidden;
+    border-left:1px solid rgba(255,255,255,.07);
+  }
+  .header-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  .header-photo-placeholder{
+    width:100%;height:100%;
+    background:#1a1a18;
+    display:flex;align-items:center;justify-content:center;
+    font-size:48px;color:#2a2a28;
+  }
+
+  /* ── STATUS BADGE ── */
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;margin-top:10px;
+    border:1px solid;
+  }
+  .badge-ok{background:#0a1f0a;color:#9FE1CB;border-color:#5DCAA5;}
+  .badge-soon{background:#2a1500;color:#FAC775;border-color:#BA7517;}
+  .badge-late{background:#2a0a0a;color:#F7C1C1;border-color:#E24B4A;}
+
+  /* ── BODY ── */
+  .body{padding:28px 36px;}
+
+  /* ── SECTION ── */
+  .section{margin-bottom:24px;page-break-inside:avoid;}
+  .section-title{
+    font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:${accent};margin-bottom:10px;padding-bottom:7px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex;align-items:center;gap:8px;
+  }
+  .section-title::before{content:'';display:block;width:3px;height:12px;background:${accent};border-radius:2px;}
+
+  /* ── GRID ROWS ── */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;}
+  .row{display:flex;flex-direction:column;gap:3px;padding:8px 12px;background:#1a1a18;border-radius:6px;border:1px solid rgba(255,255,255,.06);}
+  .row.full{grid-column:1/-1;}
+  .lbl{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5a5a56;}
+  .val{font-size:13px;color:#e8e8e6;font-weight:500;}
+  .val.mono{font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12px;color:#9a9a96;letter-spacing:.04em;}
+  .val.accent{color:${accent};}
+  .val.warn{color:#FAC775;}
+  .val.danger{color:#F7C1C1;}
+
+  /* ── TABLE ── */
+  .table-wrap{overflow:hidden;border-radius:8px;border:1px solid rgba(255,255,255,.08);}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead tr{background:#1e1e1c;}
+  thead th{padding:9px 12px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5a5a56;white-space:nowrap;}
+  tbody tr{border-top:1px solid rgba(255,255,255,.05);}
+  tbody tr.alt{background:#161615;}
+  tbody td{padding:9px 12px;color:#c8c8c4;vertical-align:top;}
+  tbody td:first-child{color:#e8e8e6;font-weight:500;white-space:nowrap;}
+
+  /* ── NOTES ── */
+  .notes-box{background:#1a1a18;border:1px solid rgba(255,255,255,.06);border-left:3px solid ${accent};border-radius:6px;padding:10px 14px;font-size:12px;color:#9a9a96;line-height:1.6;}
+
+  /* ── DOCS ── */
+  .doc-list{display:flex;flex-wrap:wrap;gap:6px;}
+  .doc-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:#1a1a18;border:1px solid rgba(255,255,255,.08);border-radius:20px;font-size:11px;color:#9a9a96;}
+
+  /* ── FOOTER ── */
+  .footer{
+    margin-top:32px;padding:16px 36px;
+    border-top:1px solid rgba(255,255,255,.07);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .footer-left{font-size:10px;color:#3a3a38;line-height:1.6;}
+  .footer-right{font-size:9px;color:#3a3a38;text-align:right;}
+
+  @media print{
+    body{background:#111110 !important;}
+    .header,.body,.footer{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-eyebrow">${LBL[it.category]} &nbsp;·&nbsp; Fiche Technique</div>
+    <div class="header-name">${it.name}</div>
+    ${(()=>{const s=st(it.nextDate);return `<span class="badge badge-${s}">${s==='ok'?'✓ À jour':s==='soon'?'⚠ Bientôt':'✕ En retard'}</span>`;})()}
+    <div class="header-date">Généré le ${dateStr}</div>
+  </div>
+  <div class="header-photo">
+    ${it.image
+      ? `<img src="${it.image}" alt="${it.name}">`
+      : `<div class="header-photo-placeholder">◻</div>`}
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- Identification -->
+  <div class="section">
+    <div class="section-title">Identification</div>
+    <div class="grid">
+      ${row('Catégorie', LBL[it.category])}
+      ${row('Contrat maintenance', it.contract ? 'Oui' : 'Non')}
+      ${veh && it.plate ? `<div class="row"><span class="lbl">Plaque d'immatriculation</span><span class="val mono">${it.plate}</span></div>` : ''}
+      ${veh && it.vin ? `<div class="row full"><span class="lbl">VIN / N° châssis</span><span class="val mono">${it.vin}</span></div>` : ''}
+      ${!veh && it.serial ? `<div class="row full"><span class="lbl">N° de série</span><span class="val mono">${it.serial}</span></div>` : ''}
+    </div>
+  </div>
+
+  <!-- Maintenance -->
+  <div class="section">
+    <div class="section-title">Maintenance</div>
+    <div class="grid">
+      <div class="row"><span class="lbl">Dernière maintenance</span><span class="val">${fd(it.lastDate)}</span></div>
+      <div class="row"><span class="lbl">Prochaine maintenance</span><span class="val ${st(it.nextDate)==='late'?'danger':st(it.nextDate)==='soon'?'warn':'accent'}">${fd(it.nextDate)}</span></div>
+      ${veh && it.km != null ? `<div class="row"><span class="lbl">Kilométrage actuel</span><span class="val">${it.km.toLocaleString('fr-BE')} km</span></div>` : ''}
+    </div>
+  </div>
+
+  <!-- Contact -->
+  ${it.cname||it.cphone||it.cemail ? `
+  <div class="section">
+    <div class="section-title">Contact Garage / Technicien</div>
+    <div class="grid">
+      ${it.cname ? `<div class="row"><span class="lbl">Nom</span><span class="val">${it.cname}</span></div>` : ''}
+      ${it.cphone ? `<div class="row"><span class="lbl">Téléphone</span><span class="val">${it.cphone}</span></div>` : ''}
+      ${it.cemail ? `<div class="row full"><span class="lbl">E-mail</span><span class="val">${it.cemail}</span></div>` : ''}
+    </div>
+  </div>` : ''}
+
+  <!-- Notes -->
+  ${it.notes ? `
+  <div class="section">
+    <div class="section-title">Notes</div>
+    <div class="notes-box">${it.notes}</div>
+  </div>` : ''}
+
+  <!-- Historique -->
+  ${hist.length ? `
+  <div class="section">
+    <div class="section-title">Historique des entretiens</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th>
+          <th>Description</th>
+          ${veh ? '<th>Type</th>' : ''}
+          ${veh ? '<th>Kilométrage</th>' : ''}
+          <th>Coût</th>
+          <th>Prochaine</th>
+        </tr></thead>
+        <tbody>${histRows}</tbody>
+      </table>
+    </div>
+  </div>` : ''}
+
+  <!-- Documents -->
+  ${docs.length ? `
+  <div class="section">
+    <div class="section-title">Documents techniques</div>
+    <div class="doc-list">
+      ${docs.map(d=>`<span class="doc-chip">📎 ${d.name}</span>`).join('')}
+    </div>
+  </div>` : ''}
+
+</div>
+
+<div class="footer">
+  <div class="footer-left">
+    <strong style="color:#5a5a56;">${prof.name||'Geenen / Genicot'}</strong><br>
+    ${prof.phone ? prof.phone+'<br>' : ''}${prof.address||'Rue Mont-Plaisir 25, 1430 Bierghes'}
+  </div>
+  <div class="footer-right">
+    Suivi Maintenance<br>
+    ${dateStr}
+  </div>
+</div>
+
+<script>window.onload=()=>{window.print();}<\/script>
+</body></html>`;
+
+  const w = window.open('','_blank','width=900,height=1100');
+  w.document.write(html);
+  w.document.close();
 }
 
 function render(){renderStats();renderItems();}
