@@ -1155,7 +1155,18 @@ function genFichePDF(id) {
   </div>
 </div>
 
-<script>window.onload=()=>{window.print();}<\/script>
+<script>
+window.onload = () => {
+  const imgs = document.querySelectorAll('img');
+  if (!imgs.length) { window.print(); return; }
+  let pending = imgs.length;
+  const tryPrint = () => { if (--pending <= 0) window.print(); };
+  imgs.forEach(img => {
+    if (img.complete && img.naturalWidth > 0) { tryPrint(); }
+    else { img.onload = tryPrint; img.onerror = tryPrint; }
+  });
+};
+<\/script>
 </body></html>`;
 
   const w = window.open('','_blank','width=900,height=1100');
