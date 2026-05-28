@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi Maintenance — Geenen / Genicot</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#111110;--bg2:#1a1a18;--bg3:#222220;--bg4:#2a2a28;--tx:#e8e8e6;--tx2:#9a9a96;--tx3:#5a5a56;--bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.14);--bd3:rgba(255,255,255,0.22);--r:8px;--rl:12px;--tm:#5DCAA5;--tmbg:#04342C;--tmdk:#9FE1CB;--tc:#F0997B;--tcbg:#4A1B0C;--tcdk:#F5C4B3;--tv:#85B7EB;--tvbg:#042C53;--tvdk:#B5D4F4;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;}
+.wrap{max-width:1280px;margin:0 auto;padding:1.5rem;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px;}
+header h1{font-size:20px;font-weight:500;display:flex;align-items:center;gap:9px;}
+header p{font-size:13px;color:var(--tx2);margin-top:3px;}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:7px;margin-bottom:1.2rem;}
+.sc{border-radius:var(--rl);padding:.65rem .8rem;border:1px solid;background:var(--bg2);}
+.sl{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:4px;}
+.sv{font-size:19px;font-weight:500;}
+.tnav{display:flex;border-bottom:1px solid var(--bd2);margin-bottom:1.1rem;overflow-x:auto;}
+.tb{padding:8px 14px;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;cursor:pointer;font-size:13px;color:var(--tx2);display:inline-flex;align-items:center;gap:5px;font-weight:500;transition:color .12s;white-space:nowrap;}
+.tb.on{color:var(--tx);border-bottom-color:var(--tx);}.tb:hover{color:var(--tx);}
+.pn{display:none;}.pn.on{display:block;}
+.fp{display:none;background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rl);padding:1rem;margin-bottom:1rem;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+@media(max-width:600px){.fg,.fg3,.pgrid{grid-template-columns:1fr;}}
+.stit{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:10px 0 7px;border-top:1px solid var(--bd);padding-top:10px;}
+label{font-size:12px;color:var(--tx2);display:block;margin-bottom:3px;}
+input,select,textarea{width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--bg3);color:var(--tx);font-size:13px;font-family:inherit;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--tv);}
+input[type=checkbox]{width:auto;accent-color:var(--tv);}
+input[type=file]{padding:5px;font-size:12px;color:var(--tx2);}
+.ckr{display:flex;align-items:center;gap:8px;padding-top:18px;}
+.ckr input{width:auto;margin:0;}.ckr label{margin:0;font-size:13px;color:var(--tx);}
+.tbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
+.fbr{display:flex;gap:5px;flex-wrap:wrap;}
+.fb{padding:5px 13px;border-radius:20px;border:1px solid var(--bd2);background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:var(--tx2);display:inline-flex;align-items:center;gap:5px;transition:all .12s;}
+.fb:hover,.fb.fa{background:var(--bg3);color:var(--tx);border-color:var(--bd3);}
+.fb.fm{background:var(--tmbg);color:var(--tmdk);border-color:var(--tm);}
+.fb.fc{background:var(--tcbg);color:var(--tcdk);border-color:var(--tc);}
+.fb.fv{background:var(--tvbg);color:var(--tvdk);border-color:var(--tv);}
+.bp{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--tx);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;}
+.bs{padding:6px 12px;background:transparent;border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--tx);}
+.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:.85rem;}
+.ic{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rl);overflow:hidden;}
+.ics{height:4px;}.icimg{height:88px;background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.icimg img{width:100%;height:100%;object-fit:cover;}
+.icb{padding:.85rem 1rem;}
+.ict{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;}
+.cico{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:var(--r);font-size:11px;font-weight:500;}
+.b-ok{background:#173404;color:#C0DD97;}.b-sn{background:#412402;color:#FAC775;}.b-lt{background:#501313;color:#F7C1C1;}
+.b-ct{background:#042C53;color:#B5D4F4;}.b-nc{background:var(--bg3);color:var(--tx2);}
+.dv{height:1px;background:var(--bd);margin:.55rem 0;}
+.m2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:.55rem;}
+.ml{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:2px;}
+.mvn{font-family:monospace;font-size:12px;color:var(--tx2);word-break:break-all;}
+.nb{font-size:12px;color:var(--tx2);background:var(--bg3);padding:6px 9px;border-left:2px solid var(--bd3);margin-bottom:.55rem;}
+.ctb{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 9px;background:var(--bg3);border-radius:var(--r);margin-bottom:.55rem;flex-wrap:wrap;}
+.icf{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px;}
+/* Bouton Google Calendar proéminent */
+.gcal-btn{width:100%;margin-top:6px;padding:7px 10px;border-radius:var(--r);border:1.5px solid #4285F4;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:#85B7EB;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .15s;}
+.gcal-btn:hover{background:#042C53;border-color:#85B7EB;}
+.gcal-btn.done{background:#173404;border-color:#5DCAA5;color:#9FE1CB;}
+.gcal-btn.done:hover{background:#0e2503;}
+.ab{padding:5px 8px;border-radius:var(--r);border:1px solid var(--bd2);background:transparent;cursor:pointer;font-size:12px;color:var(--tx2);display:inline-flex;align-items:center;gap:3px;transition:background .1s;}
+.ab:hover{background:var(--bg3);}
+.ab.d:hover{background:#501313;color:#F7C1C1;border-color:#E24B4A;}
+.ab.warn:hover{background:#412402;color:#FAC775;border-color:#BA7517;}
+/* Timeline historique */
+.tl-wrap{display:flex;gap:10px;margin-bottom:.75rem;}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:7px;}
+.tl-line{width:1px;background:var(--bd2);margin:3px auto 0;flex:1;}
+.tl-card{flex:1;background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rl);padding:.75rem .9rem;}
+.inv-img{max-height:70px;border-radius:6px;cursor:pointer;border:1px solid var(--bd2);margin-top:6px;}
+.inv-pdf{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 9px;background:var(--bg3);border-radius:var(--r);margin-top:6px;color:var(--tx2);text-decoration:none;}
+/* Calendrier */
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;}
+.cal-dow{text-align:center;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);padding:4px 0 6px;}
+.cal-day{min-height:68px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:4px;}
+.cal-day.ct{border-color:#378ADD;background:#042C53;}
+.cal-day.em{background:transparent;border-color:transparent;}
+.cal-dn{font-weight:500;color:var(--tx2);margin-bottom:2px;font-size:12px;}
+.cal-day.ct .cal-dn{color:#B5D4F4;}
+.cal-ev{font-size:10px;padding:2px 4px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+.cg2{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.85rem;}
+.ccard{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rl);padding:.85rem .95rem;}
+.avt{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;flex-shrink:0;}
+.es{text-align:center;padding:2.5rem;color:var(--tx2);}
+.imgprev{border-radius:var(--r);overflow:hidden;display:none;}
+.imgprev img{width:100%;height:100%;object-fit:cover;}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.stor-bar{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:4px;}
+.stor-fill{height:100%;border-radius:3px;transition:width .3s;}
+.inv-prev-wrap{margin-top:6px;display:none;}
+.inv-prev-wrap img{max-height:55px;border-radius:6px;border:1px solid var(--bd2);}
+/* Google Agenda embed */
+.gcal-setup{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rl);padding:1.5rem;max-width:620px;}
+.step{display:flex;gap:12px;margin-bottom:.85rem;align-items:flex-start;}
+.step-n{width:24px;height:24px;border-radius:50%;background:var(--tv);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;margin-top:1px;}
+a{color:var(--tv);text-decoration:none;}
+</style>
+<style>
+#login-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+#login-box{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rl);padding:2rem 2.5rem;width:320px;max-width:90vw;display:flex;flex-direction:column;gap:14px;}
+#login-box h2{font-size:17px;font-weight:500;text-align:center;margin-bottom:4px;}
+#login-box p{font-size:12px;color:var(--tx2);text-align:center;margin-top:-6px;}
+#login-err{font-size:12px;color:#F0997B;text-align:center;min-height:16px;}
+</style>
+</head>
+<body>
+<!-- Login overlay -->
+<div id="login-overlay">
+  <div id="login-box">
+    <h2><i class="ti ti-lock" style="margin-right:6px;color:var(--tmdk);"></i>Suivi Maintenance</h2>
+    <p>Accès privé — entrez le mot de passe</p>
+    <div>
+      <label for="login-pwd">Mot de passe</label>
+      <input type="password" id="login-pwd" placeholder="••••••••••" autofocus onkeydown="if(event.key==='Enter')checkLogin()">
+    </div>
+    <div id="login-err"></div>
+    <button class="btn" onclick="checkLogin()" style="width:100%;justify-content:center;">Accéder</button>
+  </div>
+</div>
+<div class="wrap" id="app-wrap" style="display:none;">
+<header>
+  <div>
+    <h1><i class="ti ti-tool"></i> Suivi Maintenance</h1>
+    <p>Geenen / Genicot &nbsp;·&nbsp; Rue Mont-Plaisir 25, 1430 Bierghes</p>
+  </div>
+</header>
+
+<div class="sg" id="sg"></div>
+
+<div class="tnav" id="tnav">
+  <button class="tb on" id="tb-cards" onclick="swTab('cards',this)"><i class="ti ti-layout-grid"></i> Cartes</button>
+  <button class="tb" onclick="swTab('agenda',this)"><i class="ti ti-brand-google"></i> Mon Agenda Google</button>
+  <button class="tb" onclick="swTab('cal',this)"><i class="ti ti-calendar"></i> Vue mensuelle</button>
+  <button class="tb" onclick="swTab('cts',this)"><i class="ti ti-address-book"></i> Contacts</button>
+  <button class="tb" onclick="swTab('prof',this)"><i class="ti ti-user-circle"></i> Profil & données</button>
+</div>
+
+<!-- ===== CARTES ===== -->
+<div class="pn on" id="pn-cards">
+  <div class="fp" id="fp">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="ab" onclick="closeF()"><i class="ti ti-arrow-left"></i> Retour</button>
+        <span style="font-size:14px;font-weight:500;" id="ft">Ajouter</span>
+      </div>
+      <button class="ab" onclick="closeF()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="fg">
+      <div><label for="fn">Nom</label><input type="text" id="fn" placeholder="Honda CB500F"></div>
+      <div><label for="fcat">Catégorie</label><select id="fcat" onchange="onCatChange()"><option value="maison">Maison</option><option value="moto">Moto</option><option value="voiture">Voiture</option></select></div>
+      <div><label for="fl">Dernière maintenance</label><input type="date" id="fl"></div>
+      <div><label for="fx">Prochaine maintenance</label><input type="date" id="fx"></div>
+      <div id="fplate-row"><label for="fplate">N° de plaque</label><input type="text" id="fplate" placeholder="1-ABC-123" oninput="this.value=this.value.toUpperCase()"></div>
+      <div id="fser-row"><label for="fser">Numéro de série</label><input type="text" id="fser" placeholder="SN-XXXXXXXX" style="font-family:monospace;"></div>
+      <div id="fvin-row"><label for="fvin">VIN / N° châssis</label><input type="text" id="fvin" placeholder="VF1234567890ABCDE" style="font-family:monospace;" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="ckr"><input type="checkbox" id="fct"><label for="fct">Contrat de maintenance</label></div>
+    </div>
+    <div class="stit">Photo de l'appareil</div>
+    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;">
+      <label for="ffile" id="photo-drop" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:110px;height:110px;border:2px dashed var(--bd3);border-radius:var(--r);cursor:pointer;color:var(--tx2);flex-shrink:0;background:var(--bg3);transition:border-color .15s;" onmouseover="this.style.borderColor='var(--tv)'" onmouseout="this.style.borderColor='var(--bd3)'">
+        <i class="ti ti-camera-plus" style="font-size:28px;"></i>
+        <span style="font-size:11px;text-align:center;line-height:1.3;">Cliquer pour<br>choisir une photo</span>
+        <input type="file" id="ffile" accept="image/*" onchange="handleImg(this)" style="display:none;">
+      </label>
+      <div style="flex:1;min-width:140px;">
+        <div class="imgprev" id="imgprev" style="height:110px;margin:0 0 8px;"><img id="ipv" alt="" style="border-radius:var(--r);"></div>
+        <div id="photo-hint" style="font-size:11px;color:var(--tx3);margin-bottom:6px;">ou coller une URL&nbsp;:</div>
+        <input type="text" id="fimg" placeholder="https://..." oninput="showPrev(this.value);document.getElementById('photo-hint').style.display=this.value?'none':'block';" style="font-size:12px;">
+        <button class="ab d" id="photo-clear" onclick="clearPhoto()" style="margin-top:6px;display:none;font-size:11px;"><i class="ti ti-trash" style="font-size:11px;"></i> Supprimer la photo</button>
+      </div>
+    </div>
+    <div class="stit">Documents techniques</div>
+    <div style="margin-bottom:6px;">
+      <label for="fdoc-file" style="font-size:12px;color:var(--tx2);">PDF ou image (max 5 MB)</label>
+      <input type="file" id="fdoc-file" accept="application/pdf,image/*" onchange="addDoc(this)" style="margin-top:4px;">
+      <div id="fdoc-list" style="margin-top:6px;"></div>
+    </div>
+    <div class="stit">Contact garage / technicien</div>
+    <div class="fg3">
+      <div><label for="fcn">Nom</label><input type="text" id="fcn" placeholder="Garage Dumont"></div>
+      <div><label for="fcp">Téléphone</label><input type="tel" id="fcp" placeholder="+32 4 XX XX XX"></div>
+      <div><label for="fce">E-mail</label><input type="email" id="fce" placeholder="garage@exemple.com"></div>
+    </div>
+    <div style="margin-top:8px;"><label for="fno">Notes</label><textarea id="fno" rows="2" placeholder="Observations..."></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:.85rem;justify-content:flex-end;">
+      <button class="bs" onclick="closeF()">Annuler</button>
+      <button class="bp" onclick="saveItem()">Enregistrer</button>
+    </div>
+  </div>
+  <div class="tbar">
+    <div class="fbr">
+      <button class="fb fa" id="fa" onclick="setF('all',this)">Tout</button>
+      <button class="fb" onclick="setF('maison',this)"><i class="ti ti-home"></i> Maison</button>
+      <button class="fb" onclick="setF('moto',this)"><i class="ti ti-motorbike"></i> Motos</button>
+      <button class="fb" onclick="setF('voiture',this)"><i class="ti ti-car"></i> Voitures</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="bs" onclick="exportAllICS()" title="Exporter tous les rappels en une fois"><i class="ti ti-calendar-export"></i> Exporter tous les rappels</button>
+      <button class="bp" onclick="openF(null)"><i class="ti ti-plus"></i> Ajouter</button>
+    </div>
+  </div>
+  <div class="ig" id="ig"></div>
+</div>
+
+<!-- ===== HISTORIQUE ===== -->
+<div class="pn" id="pn-hist">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.1rem;flex-wrap:wrap;">
+    <button class="ab" onclick="backToCards()"><i class="ti ti-arrow-left"></i> Retour</button>
+    <div id="hist-hdr"></div>
+  </div>
+  <div class="fp" id="add-maint-fp" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.85rem;">
+      <span style="font-size:14px;font-weight:500;" id="maint-form-title">Ajouter un entretien</span>
+      <button class="ab" onclick="closeAddMaint()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="fg">
+      <div><label for="m-date">Date de l'entretien</label><input type="date" id="m-date"></div>
+      <div><label for="m-cost">Coût (€)</label><input type="number" id="m-cost" placeholder="220"></div>
+      <div id="m-km-row"><label for="m-km">Kilométrage</label><input type="number" id="m-km" placeholder="28400"></div>
+      <div><label for="m-next">Prochaine maintenance</label><input type="date" id="m-next"></div>
+    </div>
+    <div id="m-type-row" style="margin-top:8px;display:none;"><label for="m-type">Type d'événement</label><select id="m-type"><option value="entretien">Entretien</option><option value="reparation">Réparation</option><option value="ct">Contrôle technique</option></select></div>
+    <div style="margin-top:8px;"><label for="m-desc">Description des travaux</label><input type="text" id="m-desc" placeholder="Vidange, filtre, courroie..."></div>
+    <div style="margin-top:8px;"><label for="m-notes">Notes</label><textarea id="m-notes" rows="2" placeholder="Références pièces..."></textarea></div>
+    <div class="stit">Facture</div>
+    <div class="fg">
+      <div>
+        <label for="m-inv-file">PDF ou image (max 3 MB)</label>
+        <input type="file" id="m-inv-file" accept="image/*,application/pdf" onchange="handleInvoice(this)">
+        <div id="m-inv-prev" class="inv-prev-wrap"><img id="m-inv-img" alt=""></div>
+        <div id="m-inv-info" style="font-size:12px;color:var(--tx2);margin-top:4px;"></div>
+      </div>
+      <div style="display:flex;align-items:flex-end;">
+        <button class="bs" id="m-inv-clear" onclick="clearInvoice()" style="font-size:12px;display:none;"><i class="ti ti-x"></i> Supprimer la facture</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:.85rem;justify-content:flex-end;">
+      <button class="bs" onclick="closeAddMaint()">Annuler</button>
+      <button class="bp" onclick="saveMaint()" id="maint-save-btn">Enregistrer l'entretien</button>
+    </div>
+  </div>
+  <div class="tbar" style="margin-bottom:.85rem;">
+    <span style="font-size:13px;color:var(--tx2);" id="hist-count"></span>
+    <button class="bp" onclick="openAddMaint(null)"><i class="ti ti-plus"></i> Ajouter un entretien</button>
+  </div>
+  <div id="hist-list"></div>
+</div>
+
+<!-- ===== MON AGENDA GOOGLE ===== -->
+<div class="pn" id="pn-agenda">
+  <div id="gcal-setup-box" class="gcal-setup" style="margin-bottom:1rem;">
+    <div style="font-size:14px;font-weight:500;margin-bottom:.85rem;display:flex;align-items:center;gap:8px;"><i class="ti ti-brand-google" style="color:#4285F4;font-size:18px;"></i> Connecter ton Google Calendar</div>
+    <div class="step"><div class="step-n">1</div><div style="font-size:13px;color:var(--tx2);">Ouvre <a href="https://calendar.google.com" target="_blank">calendar.google.com</a> et clique sur l'engrenage ⚙ → <strong style="color:var(--tx);">Paramètres</strong></div></div>
+    <div class="step"><div class="step-n">2</div><div style="font-size:13px;color:var(--tx2);">Dans la liste de gauche, clique sur ton calendrier principal (souvent ton adresse Gmail)</div></div>
+    <div class="step"><div class="step-n">3</div><div style="font-size:13px;color:var(--tx2);">Déroule jusqu'à <strong style="color:var(--tx);">Intégrer l'agenda</strong> → copie l'<strong style="color:var(--tx);">URL publique de l'agenda</strong> (la ligne qui commence par <code style="background:var(--bg3);padding:2px 5px;border-radius:4px;">https://calendar.google.com/calendar/embed?src=...</code>)</div></div>
+    <div class="step"><div class="step-n">4</div><div style="font-size:13px;color:var(--tx2);">Colle-la ci-dessous et clique <strong style="color:var(--tx);">Connecter</strong></div></div>
+    <div style="display:flex;gap:8px;margin-top:.5rem;">
+      <input type="text" id="gcal-url-input" placeholder="https://calendar.google.com/calendar/embed?src=..." style="flex:1;">
+      <button class="bp" onclick="saveGcalUrl()"><i class="ti ti-plug"></i> Connecter</button>
+    </div>
+    <p style="font-size:11px;color:var(--tx3);margin-top:8px;">⚠ Assure-toi que ton calendrier est défini sur <strong>Rendre disponible publiquement</strong> dans les paramètres de partage, sinon l'iframe ne s'affichera pas.</p>
+  </div>
+  <div id="gcal-iframe-wrap" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+      <span style="font-size:13px;color:var(--tx2);"><i class="ti ti-brand-google" style="color:#4285F4;"></i> Ton Google Calendar</span>
+      <button class="bs" onclick="resetGcalUrl()" style="font-size:12px;"><i class="ti ti-unlink"></i> Déconnecter</button>
+    </div>
+    <iframe id="gcal-iframe" src="" style="width:100%;height:650px;border:0;border-radius:var(--rl);background:var(--bg2);" allowfullscreen></iframe>
+  </div>
+</div>
+
+<!-- ===== VUE MENSUELLE ===== -->
+<div class="pn" id="pn-cal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="ab" onclick="chMo(-1)"><i class="ti ti-chevron-left"></i></button>
+      <span style="font-size:15px;font-weight:500;" id="cml"></span>
+      <button class="ab" onclick="chMo(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <button class="bs" onclick="exportAllICS()" style="font-size:12px;"><i class="ti ti-calendar-export"></i> Exporter tous les rappels (.ics)</button>
+  </div>
+  <div class="cal-grid" id="cg">
+    <div class="cal-dow">Lun</div><div class="cal-dow">Mar</div><div class="cal-dow">Mer</div>
+    <div class="cal-dow">Jeu</div><div class="cal-dow">Ven</div><div class="cal-dow">Sam</div><div class="cal-dow">Dim</div>
+  </div>
+</div>
+
+<!-- ===== CONTACTS ===== -->
+<div class="pn" id="pn-cts"><div class="cg2" id="ctg"></div></div>
+
+<!-- ===== PROFIL & DONNÉES ===== -->
+<div class="pn" id="pn-prof">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;max-width:860px;" id="prof-layout">
+    <div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:.75rem;">Mes coordonnées</div>
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:.85rem;">Apparaissent dans le corps de chaque e-mail envoyé aux professionnels.</p>
+      <div class="pgrid">
+        <div><label for="p-name">Nom(s)</label><input type="text" id="p-name"></div>
+        <div><label for="p-phone">Téléphone(s)</label><input type="tel" id="p-phone"></div>
+        <div><label for="p-email">E-mail</label><input type="email" id="p-email"></div>
+        <div><label for="p-address">Adresse</label><input type="text" id="p-address"></div>
+      </div>
+      <div style="margin-top:1rem;display:flex;align-items:center;gap:12px;">
+        <button class="bp" onclick="saveProfile()"><i class="ti ti-device-floppy"></i> Enregistrer</button>
+        <span id="prof-saved" style="display:none;font-size:13px;color:#C0DD97;"><i class="ti ti-check"></i> Enregistré</span>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:.75rem;">Sauvegarde &amp; restauration</div>
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:.85rem;">Exportez avant de mettre à jour le site. Réimportez ensuite pour tout retrouver.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="bp" onclick="exportData()" style="justify-content:flex-start;"><i class="ti ti-download"></i> Exporter toutes les données (JSON)</button>
+        <div>
+          <label for="imp-file" style="font-size:12px;color:var(--tx2);margin-bottom:4px;display:block;">Importer un fichier de sauvegarde</label>
+          <input type="file" id="imp-file" accept=".json" onchange="importData(this)">
+        </div>
+      </div>
+      <div style="margin-top:1.25rem;">
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:5px;display:flex;justify-content:space-between;">
+          <span><i class="ti ti-database"></i> Espace utilisé</span>
+          <span id="stor-label">—</span>
+        </div>
+        <div class="stor-bar"><div class="stor-fill" id="stor-fill"></div></div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:4px;">Limite ~5 MB. Les factures PDF occupent de l'espace.</div>
+      </div>
+    </div>
+  </div>
+  <style>#prof-layout{grid-template-columns:1fr 1fr;}@media(max-width:640px){#prof-layout{grid-template-columns:1fr;}}</style>
+</div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   CONSTANTES
+══════════════════════════════════════ */
+const SCHEMA_V = 5;
+const ICONS  = {maison:'ti-home',moto:'ti-motorbike',voiture:'ti-car'};
+const LBL    = {maison:'Maison',moto:'Moto',voiture:'Voiture'};
+const STRIPE = {maison:'#5DCAA5',moto:'#F0997B',voiture:'#85B7EB'};
+const IBGC   = {maison:'#04342C',moto:'#4A1B0C',voiture:'#042C53'};
+const ITXC   = {maison:'#9FE1CB',moto:'#F5C4B3',voiture:'#B5D4F4'};
+const CALE   = {maison:{bg:'#04342C',tx:'#9FE1CB'},moto:{bg:'#4A1B0C',tx:'#F5C4B3'},voiture:{bg:'#042C53',tx:'#B5D4F4'}};
+const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+const DEFAULT_PROFILE = {
+  name   : 'Bruno Geenen / Florence Genicot',
+  phone  : '0498/24.51.58 (Bruno) · 0477/49.62.56 (Florence)',
+  email  : '',
+  address: 'Rue Mont-Plaisir 25, 1430 Bierghes'
+};
+
+/* ══════════════════════════════════════
+   MIGRATION
+══════════════════════════════════════ */
+function migrateItems(raw) {
+  let data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  if (Array.isArray(data)) data = {__v:0, items:data};
+  const v = data.__v || 0;
+  let its = data.items || [];
+  if (v < 1) its = its.map(i => ({history:[],serial:'',vin:'',image:'',cname:'',cphone:'',cemail:'',notes:'',...i}));
+  if (v < 2) its = its.map(i => ({...i, history:(i.history||[]).map(e => ({invoice:null,...e}))}));
+  if (v < 3) its = its.map(i => ({gcalAdded:false,...i}));
+  if (v < 4) its = its.map(i => ({plate:'',...i, history:(i.history||[]).map(e => ({type:'entretien',...e}))}));
+  if (v < 5) its = its.map(i => ({docs:[],...i}));
+  return its;
+}
+
+function loadItems() {
+  const nd = localStorage.getItem('maint_data');
+  if (nd) try { return migrateItems(nd); } catch(e){}
+  for (const k of ['maint_v5','maint_v4','maint_v3','maint_v2']) {
+    const old = localStorage.getItem(k);
+    if (old) try { return migrateItems(old); } catch(e){}
+  }
+  return null;
+}
+
+function persist() {
+  localStorage.setItem('maint_data', JSON.stringify({__v:SCHEMA_V, items}));
+}
+
+function getProfile() {
+  return {...DEFAULT_PROFILE, ...JSON.parse(localStorage.getItem('maint_prof')||'{}')};
+}
+
+/* ══════════════════════════════════════
+   ÉTAT
+══════════════════════════════════════ */
+const SAMPLE = [
+  {id:1,name:'Chaudière Buderus',category:'maison',lastDate:'2024-10-15',nextDate:'2025-10-15',km:null,cost:180,contract:true,serial:'BUD-2019-4421X',vin:'',image:'',cname:'TotalEnergies',cphone:'+32 2 000 00 00',cemail:'contrat@total.be',notes:'Contrat annuel',gcalAdded:false,history:[]},
+  {id:2,name:'Climatisation Daikin',category:'maison',lastDate:'2024-06-01',nextDate:'2025-06-01',km:null,cost:120,contract:false,serial:'DAI-FTX50-7832',vin:'',image:'',cname:'Froid Confort',cphone:'+32 4 123 45 67',cemail:'info@froidconfort.be',notes:'Nettoyer filtre avant été',gcalAdded:false,history:[]},
+  {id:3,name:'Honda CB500F',category:'moto',lastDate:'2024-09-20',nextDate:'2025-09-20',km:28400,cost:220,contract:false,serial:'PC45E-5039211',vin:'JH2PC450XEK500312',image:'',cname:'Moto Garage Central',cphone:'+32 4 987 65 43',cemail:'moto@central.be',notes:'',gcalAdded:false,history:[{id:1001,date:'2024-09-20',description:'Vidange + filtre, contrôle chaîne',cost:220,km:28400,nextDate:'2025-09-20',notes:'Chaîne à mi-vie',invoice:null}]},
+  {id:4,name:'Peugeot 308',category:'voiture',lastDate:'2024-11-05',nextDate:'2025-05-05',km:68000,cost:340,contract:false,serial:'',vin:'VF3LBHZTXFS312984',image:'',cname:'Garage Dumont',cphone:'+32 4 555 12 34',cemail:'dumont@garage.be',notes:'CT juin 2025',gcalAdded:false,history:[{id:2001,date:'2024-11-05',description:'Révision 60k — courroie + plaquettes',cost:340,km:68000,nextDate:'2025-05-05',notes:'',invoice:null}]}
+];
+
+let items = loadItems() || JSON.parse(JSON.stringify(SAMPLE));
+let editId=null, curF='all', calY=new Date().getFullYear(), calM=new Date().getMonth();
+let histItemId=null, histEditId=null, invoiceData=null, docsBuffer=[];
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function st(d){if(!d)return'ok';const diff=(new Date(d)-new Date())/864e5;return diff<0?'late':diff<30?'soon':'ok';}
+function fd(d){if(!d)return'—';return new Date(d).toLocaleDateString('fr-BE',{day:'2-digit',month:'short',year:'numeric'});}
+function isVeh(cat){return cat==='moto'||cat==='voiture';}
+function pad(n){return String(n).padStart(2,'0');}
+function toICSDate(d){return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;}
+
+/* ══════════════════════════════════════
+   GOOGLE CALENDAR — BOUTON PAR CARTE
+══════════════════════════════════════ */
+function setGCal(id) {
+  const it = items.find(i=>i.id===id);
+  if (!it || !it.nextDate) return;
+  if (!it.gcalAdded) {
+    // Ouvrir Google Calendar avec rappel 30 jours avant
+    const d = new Date(it.nextDate);
+    const ds = toICSDate(d);
+    const nd = new Date(d.getTime()+864e5);
+    const es = toICSDate(nd);
+    const prof = getProfile();
+    const det = encodeURIComponent(
+      LBL[it.category] +
+      (it.serial ? '\nN° série : '+it.serial : '') +
+      (it.vin ? '\nVIN : '+it.vin : '') +
+      '\nDernière maintenance : '+fd(it.lastDate) +
+      '\n\nRappel automatique 30 jours avant.\n— '+prof.name+'\n'+prof.phone+'\n'+prof.address
+    );
+    window.open(
+      `https://calendar.google.com/calendar/render?action=TEMPLATE`+
+      `&text=${encodeURIComponent('🔧 Maintenance — '+it.name)}`+
+      `&dates=${ds}/${es}`+
+      `&details=${det}`,
+      '_blank'
+    );
+    // Marquer comme ajouté
+    it.gcalAdded = true;
+  } else {
+    // Réinitialiser
+    if (confirm('Marquer comme "non ajouté" à Google Calendar ?')) it.gcalAdded = false;
+  }
+  persist(); render();
+}
+
+/* ══════════════════════════════════════
+   EXPORT ICS GROUPÉ (tous les items)
+══════════════════════════════════════ */
+function exportAllICS() {
+  const withDate = items.filter(i => i.nextDate);
+  if (!withDate.length) { alert('Aucune date de prochaine maintenance encodée.'); return; }
+  let events = '';
+  withDate.forEach(it => {
+    const d = new Date(it.nextDate);
+    const ds = toICSDate(d);
+    const nd = new Date(d.getTime()+864e5);
+    const es = toICSDate(nd);
+    // Rappel 30 jours avant
+    const rem = new Date(d.getTime() - 30*864e5);
+    const rs = toICSDate(rem);
+    events += `BEGIN:VEVENT\r\n`+
+      `DTSTART;VALUE=DATE:${ds}\r\n`+
+      `DTEND;VALUE=DATE:${es}\r\n`+
+      `SUMMARY:🔧 Maintenance — ${it.name}\r\n`+
+      `DESCRIPTION:${LBL[it.category]}${it.serial?'\\nSN: '+it.serial:''}${it.vin?'\\nVIN: '+it.vin:''}\\nDernière: ${fd(it.lastDate)}\r\n`+
+      `BEGIN:VALARM\r\nTRIGGER;VALUE=DATE-TIME:${rs}T080000Z\r\nACTION:DISPLAY\r\n`+
+      `DESCRIPTION:Rappel 30j: ${it.name}\r\nEND:VALARM\r\n`+
+      `END:VEVENT\r\n`;
+  });
+  const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Maintenance Geenen//FR\r\nCALSCALE:GREGORIAN\r\n${events}END:VCALENDAR`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}));
+  a.download = `rappels-maintenance-${new Date().toISOString().split('T')[0]}.ics`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+/* ══════════════════════════════════════
+   AGENDA GOOGLE EMBED
+══════════════════════════════════════ */
+function saveGcalUrl() {
+  const url = document.getElementById('gcal-url-input').value.trim();
+  if (!url || !url.includes('calendar.google.com')) { alert('URL invalide.'); return; }
+  localStorage.setItem('maint_gcal_url', url);
+  showGcalEmbed(url);
+}
+
+function showGcalEmbed(url) {
+  document.getElementById('gcal-setup-box').style.display = 'none';
+  document.getElementById('gcal-iframe').src = url + '&mode=MONTH&bgcolor=%23111110&color=%235DCAA5&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0';
+  document.getElementById('gcal-iframe-wrap').style.display = 'block';
+}
+
+function resetGcalUrl() {
+  if (!confirm('Déconnecter l\'agenda Google ?')) return;
+  localStorage.removeItem('maint_gcal_url');
+  document.getElementById('gcal-setup-box').style.display = 'block';
+  document.getElementById('gcal-iframe-wrap').style.display = 'none';
+  document.getElementById('gcal-iframe').src = '';
+}
+
+function loadGcalTab() {
+  const url = localStorage.getItem('maint_gcal_url');
+  if (url) {
+    document.getElementById('gcal-url-input').value = url;
+    showGcalEmbed(url);
+  }
+}
+
+/* ══════════════════════════════════════
+   NAVIGATION ONGLETS
+══════════════════════════════════════ */
+function swTab(id,btn){
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.pn').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('pn-'+id).classList.add('on');
+  if(id==='cal')renderCal();
+  if(id==='cts')renderContacts();
+  if(id==='prof'){loadProfile();updateStorageBar();}
+  if(id==='agenda')loadGcalTab();
+}
+
+function setF(f,btn){
+  curF=f;
+  document.querySelectorAll('.fb').forEach(b=>{b.className='fb';});
+  if(f==='all')btn.classList.add('fa');
+  else if(f==='maison')btn.classList.add('fm');
+  else if(f==='moto')btn.classList.add('fc');
+  else if(f==='voiture')btn.classList.add('fv');
+  renderItems();
+}
+
+/* ══════════════════════════════════════
+   FORMULAIRE ÉLÉMENT
+══════════════════════════════════════ */
+function onCatChange(){
+  const v=document.getElementById('fcat').value,veh=isVeh(v);
+  document.getElementById('fplate-row').style.display=veh?'block':'none';
+  document.getElementById('fvin-row').style.display=veh?'block':'none';
+  document.getElementById('fser-row').style.display=veh?'none':'block';
+}
+function handleImg(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>5*1024*1024){alert('Photo trop volumineuse (max 5 MB).');input.value='';return;}
+  const reader=new FileReader();
+  reader.onerror=()=>alert('Erreur de lecture de la photo.');
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas'),mw=600,ratio=Math.min(1,mw/img.width);
+      c.width=Math.round(img.width*ratio);c.height=Math.round(img.height*ratio);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      const b64=c.toDataURL('image/jpeg',.72);
+      document.getElementById('fimg').value=b64;
+      showPrev(b64);
+    };
+    img.onerror=()=>alert('Impossible de lire cette image.');
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function showPrev(src){
+  const pv=document.getElementById('imgprev');
+  const clr=document.getElementById('photo-clear');
+  const lbl=document.getElementById('photo-drop');
+  if(!src){pv.style.display='none';if(clr)clr.style.display='none';if(lbl)lbl.style.display='flex';return;}
+  document.getElementById('ipv').src=src;pv.style.display='block';
+  if(clr)clr.style.display='inline-flex';
+  if(lbl)lbl.style.display='none';
+}
+function clearPhoto(){
+  document.getElementById('fimg').value='';
+  document.getElementById('ffile').value='';
+  showPrev('');
+}
+function addDoc(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>5*1024*1024){alert('Document trop volumineux (max 5 MB).');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{docsBuffer.push({id:Date.now(),name:file.name,data:e.target.result,type:file.type});renderDocList();};
+  reader.readAsDataURL(file);input.value='';
+}
+function renderDocList(){
+  const el=document.getElementById('fdoc-list');if(!el)return;
+  el.innerHTML=docsBuffer.map((d,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px;"><i class="ti ${d.type==='application/pdf'?'ti-file-type-pdf':'ti-photo'}" style="color:#9FE1CB;"></i><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</span><button class="ab d" onclick="docsBuffer.splice(${i},1);renderDocList()"><i class="ti ti-x" style="font-size:11px;"></i></button></div>`).join('');
+}
+function viewDoc(itemId,docId){
+  const it=items.find(i=>i.id===itemId);
+  const doc=(it?.docs||[]).find(d=>d.id===docId);if(!doc)return;
+  const b64=doc.data.split(',')[1],bytes=atob(b64),ab=new ArrayBuffer(bytes.length),ia=new Uint8Array(ab);
+  for(let i=0;i<bytes.length;i++)ia[i]=bytes.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([ab],{type:doc.type}));
+  const a=document.createElement('a');a.href=url;
+  if(doc.type.startsWith('image/'))a.target='_blank';else a.download=doc.name;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+function openF(id){
+  editId=id;document.getElementById('fp').style.display='block';
+  document.getElementById('ft').textContent=id?'Modifier':'Ajouter un élément';
+  ['fn','fl','fx','fplate','fser','fvin','fimg','fcn','fcp','fce','fno'].forEach(k=>{const el=document.getElementById(k);if(el)el.value='';});
+  document.getElementById('fct').checked=false;document.getElementById('fcat').value='maison';
+  document.getElementById('ffile').value='';document.getElementById('fdoc-file').value='';showPrev('');onCatChange();
+  const it=id?items.find(i=>i.id===id):null;
+  docsBuffer=it?[...(it.docs||[])]:[];renderDocList();
+  if(it){
+    document.getElementById('fn').value=it.name||'';document.getElementById('fcat').value=it.category||'maison';
+    document.getElementById('fl').value=it.lastDate||'';document.getElementById('fx').value=it.nextDate||'';
+    document.getElementById('fplate').value=it.plate||'';
+    document.getElementById('fct').checked=!!it.contract;document.getElementById('fser').value=it.serial||'';
+    document.getElementById('fvin').value=it.vin||'';document.getElementById('fimg').value=it.image||'';
+    document.getElementById('fcn').value=it.cname||'';document.getElementById('fcp').value=it.cphone||'';
+    document.getElementById('fce').value=it.cemail||'';document.getElementById('fno').value=it.notes||'';
+    if(it.image)showPrev(it.image);onCatChange();
+  }
+  document.getElementById('fp').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeF(){document.getElementById('fp').style.display='none';editId=null;docsBuffer=[];}
+function saveItem(){
+  const name=document.getElementById('fn').value.trim();if(!name){alert('Nom obligatoire');return;}
+  const d={name,category:document.getElementById('fcat').value,lastDate:document.getElementById('fl').value,nextDate:document.getElementById('fx').value,km:editId?(items.find(x=>x.id===editId)?.km??null):null,plate:document.getElementById('fplate').value,contract:document.getElementById('fct').checked,serial:document.getElementById('fser').value,vin:document.getElementById('fvin').value,image:document.getElementById('fimg').value,cname:document.getElementById('fcn').value,cphone:document.getElementById('fcp').value,cemail:document.getElementById('fce').value,notes:document.getElementById('fno').value,docs:docsBuffer};
+  if(editId){const i=items.findIndex(x=>x.id===editId);items[i]={history:[],gcalAdded:false,...items[i],...d};}
+  else{d.id=Date.now();d.history=[];d.gcalAdded=false;items.push(d);}
+  persist();closeF();render();
+}
+function delItem(id){if(!confirm('Supprimer cet élément et son historique ?'))return;items=items.filter(i=>i.id!==id);persist();render();}
+
+/* ══════════════════════════════════════
+   HISTORIQUE
+══════════════════════════════════════ */
+function showHistory(id){
+  histItemId=id;
+  document.querySelectorAll('.pn').forEach(p=>p.classList.remove('on'));
+  document.getElementById('tnav').style.display='none';
+  document.getElementById('pn-hist').classList.add('on');
+  renderHistory(id);
+}
+function backToCards(){
+  document.getElementById('pn-hist').classList.remove('on');
+  document.getElementById('tnav').style.display='flex';
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tb-cards').classList.add('on');
+  document.getElementById('pn-cards').classList.add('on');
+}
+function openAddMaint(editEntryId){
+  histEditId=editEntryId||null;invoiceData=null;
+  const it=items.find(i=>i.id===histItemId),veh=it&&isVeh(it.category);
+  document.getElementById('m-km-row').style.display=veh?'block':'none';
+  document.getElementById('m-type-row').style.display=veh?'block':'none';
+  ['m-date','m-cost','m-km','m-next','m-desc','m-notes'].forEach(k=>{const el=document.getElementById(k);if(el)el.value='';});
+  document.getElementById('m-type').value='entretien';
+  document.getElementById('m-inv-file').value='';
+  document.getElementById('m-inv-prev').style.display='none';
+  document.getElementById('m-inv-info').textContent='';
+  document.getElementById('m-inv-clear').style.display='none';
+  if(histEditId){
+    const entry=(it.history||[]).find(e=>e.id===histEditId);
+    if(entry){
+      document.getElementById('m-date').value=entry.date||'';
+      document.getElementById('m-cost').value=entry.cost||'';
+      if(veh)document.getElementById('m-km').value=entry.km||'';
+      document.getElementById('m-next').value=entry.nextDate||'';
+      document.getElementById('m-desc').value=entry.description||'';
+      document.getElementById('m-notes').value=entry.notes||'';
+      if(veh)document.getElementById('m-type').value=entry.type||'entretien';
+      if(entry.invoice){invoiceData=entry.invoice;showInvoicePreview(entry.invoice);}
+    }
+    document.getElementById('maint-form-title').textContent='Modifier l\'entretien';
+    document.getElementById('maint-save-btn').textContent='Enregistrer les modifications';
+  } else {
+    document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
+    document.getElementById('maint-form-title').textContent='Ajouter un entretien';
+    document.getElementById('maint-save-btn').textContent='Enregistrer l\'entretien';
+  }
+  document.getElementById('add-maint-fp').style.display='block';
+  document.getElementById('add-maint-fp').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeAddMaint(){document.getElementById('add-maint-fp').style.display='none';histEditId=null;invoiceData=null;}
+function handleInvoice(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>3*1024*1024){alert('Fichier trop volumineux (max 3 MB). Compressez le PDF ou réduisez la photo.');input.value='';return;}
+  const reader=new FileReader();
+  reader.onerror=()=>alert('Erreur de lecture du fichier.');
+  reader.onload=e=>{
+    if(file.type.startsWith('image/')){
+      const img=new Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas'),mw=1200,ratio=Math.min(1,mw/img.width);
+        c.width=Math.round(img.width*ratio);c.height=Math.round(img.height*ratio);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        invoiceData={name:file.name,data:c.toDataURL('image/jpeg',.8),type:'image/jpeg'};
+        showInvoicePreview(invoiceData);
+      };
+      img.onerror=()=>{invoiceData={name:file.name,data:e.target.result,type:file.type};showInvoicePreview(invoiceData);};
+      img.src=e.target.result;
+    } else {
+      invoiceData={name:file.name,data:e.target.result,type:file.type};
+      showInvoicePreview(invoiceData);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function showInvoicePreview(inv){
+  if(!inv)return;
+  if(inv.type.startsWith('image/')){document.getElementById('m-inv-img').src=inv.data;document.getElementById('m-inv-prev').style.display='block';}
+  document.getElementById('m-inv-info').textContent=inv.name+' — '+Math.round(inv.data.length*0.75/1024)+' KB';
+  document.getElementById('m-inv-clear').style.display='inline-flex';
+}
+function clearInvoice(){invoiceData=null;document.getElementById('m-inv-file').value='';document.getElementById('m-inv-prev').style.display='none';document.getElementById('m-inv-info').textContent='';document.getElementById('m-inv-clear').style.display='none';}
+function saveMaint(){
+  const date=document.getElementById('m-date').value;if(!date){alert('Date obligatoire');return;}
+  const it=items.find(i=>i.id===histItemId);if(!it)return;if(!it.history)it.history=[];
+  const eData={date,type:isVeh(it.category)?document.getElementById('m-type').value:'entretien',description:document.getElementById('m-desc').value,cost:document.getElementById('m-cost').value?+document.getElementById('m-cost').value:null,km:document.getElementById('m-km').value?+document.getElementById('m-km').value:null,nextDate:document.getElementById('m-next').value,notes:document.getElementById('m-notes').value,invoice:invoiceData};
+  if(histEditId){const idx=it.history.findIndex(e=>e.id===histEditId);if(idx>=0)it.history[idx]={id:histEditId,...eData};}
+  else it.history.push({id:Date.now(),...eData});
+  const sorted=[...it.history].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(sorted.length>0){it.lastDate=sorted[0].date;if(sorted[0].nextDate)it.nextDate=sorted[0].nextDate;if(sorted[0].km!=null&&isVeh(it.category))it.km=sorted[0].km;}
+  // Réinitialiser gcalAdded si la date a changé
+  if(eData.nextDate&&eData.nextDate!==it.nextDate)it.gcalAdded=false;
+  persist();closeAddMaint();renderHistory(histItemId);render();
+}
+function delEntry(itemId,entryId){if(!confirm('Supprimer cet entretien ?'))return;const it=items.find(i=>i.id===itemId);it.history=(it.history||[]).filter(e=>e.id!==entryId);persist();renderHistory(itemId);render();}
+function viewInvoice(itemId,entryId){
+  const it=items.find(i=>i.id===itemId);
+  const entry=(it?.history||[]).find(e=>e.id===entryId);
+  if(!entry?.invoice)return;
+  const inv=entry.invoice;
+  try{
+    const b64=inv.data.split(',')[1];
+    const bytes=atob(b64),ab=new ArrayBuffer(bytes.length),ia=new Uint8Array(ab);
+    for(let i=0;i<bytes.length;i++)ia[i]=bytes.charCodeAt(i);
+    const url=URL.createObjectURL(new Blob([ab],{type:inv.type}));
+    const a=document.createElement('a');
+    a.href=url;
+    if(inv.type.startsWith('image/'))a.target='_blank';
+    else a.download=inv.name;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }catch(e){alert("Impossible d'ouvrir le fichier: "+e.message);}
+}
+function renderHistory(id){
+  const it=items.find(i=>i.id===id);if(!it)return;const veh=isVeh(it.category);
+  document.getElementById('hist-hdr').innerHTML=`<div style="display:flex;align-items:center;gap:10px;">${it.image?`<img src="${it.image}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;" alt="">`:`<div style="width:48px;height:48px;border-radius:8px;background:${IBGC[it.category]};display:flex;align-items:center;justify-content:center;"><i class="ti ${ICONS[it.category]}" style="font-size:22px;color:${ITXC[it.category]};"></i></div>`}<div><div style="font-weight:500;font-size:15px;">${it.name}</div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:${STRIPE[it.category]};margin-top:2px;">${LBL[it.category]}</div>${it.serial&&!veh?`<div style="font-family:monospace;font-size:11px;color:var(--tx3);margin-top:1px;">${it.serial}</div>`:''}</div></div>`;
+  const hist=(it.history||[]).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const cnt=hist.length;
+  document.getElementById('hist-count').textContent=cnt?`${cnt} entretien${cnt>1?'s':''} enregistré${cnt>1?'s':''}`:'Aucun entretien encore';
+  if(!cnt){document.getElementById('hist-list').innerHTML='<div class="es"><i class="ti ti-history" style="font-size:28px;display:block;margin-bottom:8px;"></i>Aucun entretien. Cliquez sur « Ajouter un entretien ».</div>';return;}
+  document.getElementById('hist-list').innerHTML=hist.map((e,idx)=>{
+    const t=e.type||'entretien';
+    const tbg={entretien:'#1a2a1a',reparation:'#412402',ct:'#042C53'}[t];
+    const tc2={entretien:'#9FE1CB',reparation:'#FAC775',ct:'#B5D4F4'}[t];
+    const tlbl={entretien:'Entretien',reparation:'Réparation',ct:'CT'}[t];
+    return `
+    <div class="tl-wrap">
+      <div style="display:flex;flex-direction:column;align-items:center;width:18px;flex-shrink:0;">
+        <div class="tl-dot" style="background:${STRIPE[it.category]};"></div>
+        ${idx<hist.length-1?'<div class="tl-line"></div>':''}
+      </div>
+      <div class="tl-card" style="margin-bottom:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
+          <div style="display:flex;align-items:center;gap:6px;"><span style="font-weight:500;font-size:13px;">${fd(e.date)}</span>${veh?`<span class="bdg" style="background:${tbg};color:${tc2};font-size:10px;">${tlbl}</span>`:''}</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            ${e.cost!=null?`<span style="font-weight:500;font-size:13px;color:#9FE1CB;">${e.cost.toLocaleString('fr-BE',{style:'currency',currency:'EUR'})}</span>`:''}
+            <button class="ab warn" onclick="openAddMaint(${e.id})" title="Modifier"><i class="ti ti-edit" style="font-size:12px;"></i></button>
+            <button class="ab d" onclick="delEntry(${id},${e.id})" title="Supprimer"><i class="ti ti-trash" style="font-size:12px;"></i></button>
+          </div>
+        </div>
+        ${e.description?`<div style="font-size:13px;margin-bottom:5px;">${e.description}</div>`:''}
+        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--tx2);">
+          ${veh&&e.km!=null?`<span><i class="ti ti-speedometer" style="font-size:12px;vertical-align:-1px;"></i> ${e.km.toLocaleString('fr-BE')} km</span>`:''}
+          ${e.nextDate?`<span><i class="ti ti-calendar-event" style="font-size:12px;vertical-align:-1px;"></i> Prochaine : ${fd(e.nextDate)}</span>`:''}
+        </div>
+        ${e.notes?`<div style="font-size:12px;color:var(--tx2);margin-top:5px;border-left:2px solid var(--bd3);padding-left:8px;">${e.notes}</div>`:''}
+        ${e.invoice?`<div>${e.invoice.type.startsWith('image/')?`<img class="inv-img" src="${e.invoice.data}" onclick="viewInvoice(${id},${e.id})" title="Voir la facture" alt="Facture">`:`<a class="inv-pdf" href="${e.invoice.data}" download="${e.invoice.name}"><i class="ti ti-file-type-pdf"></i> ${e.invoice.name}</a>`}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   CALENDRIER MENSUEL
+══════════════════════════════════════ */
+function renderCal(){
+  document.getElementById('cml').textContent=`${MONTHS[calM]} ${calY}`;
+  const firstDay=new Date(calY,calM,1);let sd=firstDay.getDay();sd=sd===0?6:sd-1;
+  const dim=new Date(calY,calM+1,0).getDate(),today=new Date();
+  const dows=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  let html=dows;
+  for(let i=0;i<sd;i++)html+=`<div class="cal-day em"></div>`;
+  for(let d=1;d<=dim;d++){
+    const iT=d===today.getDate()&&calM===today.getMonth()&&calY===today.getFullYear();
+    const evts=items.filter(i=>{if(!i.nextDate)return false;const nd=new Date(i.nextDate);return nd.getFullYear()===calY&&nd.getMonth()===calM&&nd.getDate()===d;});
+    html+=`<div class="cal-day${iT?' ct':''}"><div class="cal-dn">${d}</div>${evts.map(e=>`<span class="cal-ev" style="background:${CALE[e.category].bg};color:${CALE[e.category].tx};">${e.name}</span>`).join('')}</div>`;
+  }
+  document.getElementById('cg').innerHTML=html;
+}
+function chMo(dir){calM+=dir;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}renderCal();}
+
+/* ══════════════════════════════════════
+   CONTACTS
+══════════════════════════════════════ */
+function renderContacts(){
+  const byKey={};
+  items.forEach(it=>{const key=it.cemail||it.cphone||it.cname;if(!key)return;if(!byKey[key])byKey[key]={cname:it.cname,cphone:it.cphone,cemail:it.cemail,items:[]};byKey[key].items.push(it);});
+  const cts=Object.values(byKey);
+  if(!cts.length){document.getElementById('ctg').innerHTML='<div class="es"><i class="ti ti-address-book" style="font-size:28px;display:block;margin-bottom:8px;"></i>Aucun contact.</div>';return;}
+  const av=[['#04342C','#9FE1CB'],['#4A1B0C','#F5C4B3'],['#042C53','#B5D4F4'],['#173404','#C0DD97'],['#412402','#FAC775']];
+  document.getElementById('ctg').innerHTML=cts.map((ct,i)=>{const ini=(ct.cname||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();const[bg,tc]=av[i%av.length];return`<div class="ccard"><div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;"><div class="avt" style="background:${bg};color:${tc};">${ini}</div><div><div style="font-weight:500;font-size:14px;">${ct.cname||'Contact'}</div><div style="font-size:12px;color:var(--tx2);">${ct.items.length} élément${ct.items.length>1?'s':''}</div></div></div>${ct.cphone?`<div style="display:flex;align-items:center;gap:7px;font-size:13px;margin-bottom:5px;"><i class="ti ti-phone" style="font-size:13px;color:var(--tx3);"></i><a href="tel:${ct.cphone}" style="color:var(--tx);">${ct.cphone}</a></div>`:''} ${ct.cemail?`<div style="display:flex;align-items:center;gap:7px;font-size:13px;margin-bottom:7px;"><i class="ti ti-mail" style="font-size:13px;color:var(--tx3);"></i><a href="mailto:${ct.cemail}">${ct.cemail}</a></div>`:''}<div style="height:1px;background:var(--bd);margin-bottom:7px;"></div><div style="display:flex;flex-wrap:wrap;gap:4px;">${ct.items.map(it=>`<span class="bdg" style="background:${IBGC[it.category]};color:${ITXC[it.category]};font-size:11px;"><i class="ti ${ICONS[it.category]}" style="font-size:10px;"></i> ${it.name}</span>`).join('')}</div></div>`;}).join('');
+}
+
+/* ══════════════════════════════════════
+   PROFIL & DONNÉES
+══════════════════════════════════════ */
+function loadProfile(){const p=getProfile();document.getElementById('p-name').value=p.name||'';document.getElementById('p-phone').value=p.phone||'';document.getElementById('p-email').value=p.email||'';document.getElementById('p-address').value=p.address||'';}
+function saveProfile(){localStorage.setItem('maint_prof',JSON.stringify({name:document.getElementById('p-name').value,phone:document.getElementById('p-phone').value,email:document.getElementById('p-email').value,address:document.getElementById('p-address').value}));const b=document.getElementById('prof-saved');b.style.display='inline-flex';setTimeout(()=>b.style.display='none',2500);updateStorageBar();}
+function exportData(){const payload={__v:SCHEMA_V,__export:new Date().toISOString(),items,profile:getProfile()};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download=`maintenance-backup-${new Date().toISOString().split('T')[0]}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);}
+function importData(input){const file=input.files[0];if(!file)return;const r=new FileReader();r.onload=e=>{try{const data=JSON.parse(e.target.result);if(!data.items&&!Array.isArray(data)){alert('Fichier invalide.');return;}const n=(data.items||data).length;if(!confirm(`Importer ${n} élément${n>1?'s':''} ? Les données actuelles seront remplacées.`))return;items=migrateItems(data);if(data.profile)localStorage.setItem('maint_prof',JSON.stringify(data.profile));persist();render();loadProfile();updateStorageBar();alert('Import réussi — '+n+' élément'+(n>1?'s':'')+' chargé'+(n>1?'s':'')+'.');}catch(err){alert('Erreur: '+err.message);}input.value='';};r.readAsText(file);}
+function updateStorageBar(){try{let total=0;for(let k in localStorage)if(localStorage.hasOwnProperty(k))total+=localStorage[k].length*2;const kb=Math.round(total/1024),pct=Math.min(100,Math.round(kb/5120*100));document.getElementById('stor-label').textContent=kb+' KB / ~5 MB ('+pct+'%)';const fill=document.getElementById('stor-fill');fill.style.width=pct+'%';fill.style.background=pct>80?'#E24B4A':pct>60?'#BA7517':'#5DCAA5';}catch(e){}}
+
+/* ══════════════════════════════════════
+   GMAIL
+══════════════════════════════════════ */
+function draftMail(id){
+  const it=items.find(i=>i.id===id),prof=getProfile();
+  const lines=[`Bonjour${it.cname?' '+it.cname:''},`,'',`Je vous contacte afin de convenir d'un rendez-vous pour l'entretien de mon ${it.name}.`,'','— Informations —',`Modèle : ${it.name}`];
+  if(it.serial)lines.push(`N° de série : ${it.serial}`);if(it.plate)lines.push('Plaque : '+it.plate);if(it.vin)lines.push(`VIN : ${it.vin}`);if(it.lastDate)lines.push(`Dernière maintenance : ${fd(it.lastDate)}`);if(it.nextDate)lines.push(`Prochaine prévue : ${fd(it.nextDate)}`);
+  lines.push('','Pourriez-vous me confirmer vos disponibilités ?','','Cordialement,');
+  if(prof.name)lines.push(prof.name);if(prof.phone)lines.push(prof.phone);if(prof.email)lines.push(prof.email);if(prof.address)lines.push(prof.address);
+  window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(it.cemail||'')}&su=${encodeURIComponent('Entretien — '+it.name)}&body=${encodeURIComponent(lines.join('\n'))}`,'_blank');
+}
+
+/* ══════════════════════════════════════
+   RENDU PRINCIPAL
+══════════════════════════════════════ */
+function renderStats(){
+  const late=items.filter(i=>st(i.nextDate)==='late').length,soon=items.filter(i=>st(i.nextDate)==='soon').length;
+  const nm=items.filter(i=>i.category==='maison').length,nc=items.filter(i=>i.category==='moto').length,nv=items.filter(i=>i.category==='voiture').length;
+  document.getElementById('sg').innerHTML=[{l:'Total',v:items.length,i:'ti-tool',bc:'rgba(255,255,255,0.14)',tc:'#9a9a96',vc:'#e8e8e6'},{l:'En retard',v:late,i:'ti-alert-circle',bc:'#E24B4A',tc:'#F09595',vc:'#F7C1C1',xb:'#501313'},{l:'Bientôt',v:soon,i:'ti-clock',bc:'#BA7517',tc:'#EF9F27',vc:'#FAC775',xb:'#412402'},{l:'Maison',v:nm,i:'ti-home',bc:'#5DCAA5',tc:'#9FE1CB',vc:'#9FE1CB',xb:'#04342C'},{l:'Motos',v:nc,i:'ti-motorbike',bc:'#F0997B',tc:'#F5C4B3',vc:'#F5C4B3',xb:'#4A1B0C'},{l:'Voitures',v:nv,i:'ti-car',bc:'#85B7EB',tc:'#B5D4F4',vc:'#B5D4F4',xb:'#042C53'}].map(s=>`<div class="sc" style="border-color:${s.bc};${s.xb?'background:'+s.xb+';':''}"><div class="sl" style="color:${s.tc};"><i class="ti ${s.i}"></i>${s.l}</div><div class="sv" style="color:${s.vc};">${s.v}</div></div>`).join('');
+}
+
+function renderItems(){
+  const ord={late:0,soon:1,ok:2};
+  const fil=(curF==='all'?items:items.filter(i=>i.category===curF)).sort((a,b)=>ord[st(a.nextDate)]-ord[st(b.nextDate)]);
+  if(!fil.length){document.getElementById('ig').innerHTML='<div class="es"><i class="ti ti-inbox" style="font-size:28px;display:block;margin-bottom:8px;"></i>Aucun élément.</div>';return;}
+  const sc={late:{cls:'b-lt',lbl:'En retard',ico:'ti-alert-circle'},soon:{cls:'b-sn',lbl:'Bientôt',ico:'ti-clock'},ok:{cls:'b-ok',lbl:'À jour',ico:'ti-circle-check'}};
+  document.getElementById('ig').innerHTML=fil.map(it=>{
+    const s=st(it.nextDate),scc=sc[s],veh=isVeh(it.category);
+    const nxtc=s==='late'?'#F7C1C1':s==='soon'?'#FAC775':'#e8e8e6';
+    const hc=it.cname||it.cphone||it.cemail,hlen=(it.history||[]).length,hHasInv=(it.history||[]).some(e=>e.invoice),docs=(it.docs||[]);
+    const logoHtml=it.image
+      ?`<div style="width:46px;height:46px;border-radius:var(--r);overflow:hidden;flex-shrink:0;border:1px solid var(--bd2);cursor:pointer;position:relative;" onclick="openF(${it.id})" title="Modifier la photo"><img src="${it.image}" style="width:100%;height:100%;object-fit:cover;" alt=""><div style="position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;transition:background .15s;" onmouseover="this.style.background='rgba(0,0,0,.45)'" onmouseout="this.style.background='rgba(0,0,0,0)'"><i class="ti ti-camera" style="color:#fff;font-size:16px;opacity:0;transition:opacity .15s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0"></i></div></div>`
+      :`<div onclick="openF(${it.id})" title="Ajouter une photo" style="width:46px;height:46px;border-radius:var(--r);background:${IBGC[it.category]};color:${ITXC[it.category]};font-size:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex-shrink:0;cursor:pointer;border:1px dashed ${ITXC[it.category]}40;"><i class="ti ${ICONS[it.category]}"></i><i class="ti ti-camera-plus" style="font-size:10px;opacity:.6;"></i></div>`;
+
+    // Bouton Google Calendar proéminent
+    const gcalBtnHtml = it.nextDate ? `
+      <button class="gcal-btn${it.gcalAdded?' done':''}" onclick="setGCal(${it.id})">
+        ${it.gcalAdded
+          ? `<i class="ti ti-circle-check" style="font-size:15px;"></i> Dans Google Calendar`
+          : `<i class="ti ti-brand-google" style="font-size:15px;"></i> Ajouter au Google Calendar`}
+      </button>` : '';
+
+    return`<div class="ic">
+      <div class="ics" style="background:${STRIPE[it.category]};"></div>
+      <div class="icb">
+        <div class="ict">
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${logoHtml}
+            <div><div style="font-weight:500;font-size:14px;">${it.name}</div><div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:${STRIPE[it.category]};margin-top:1px;">${LBL[it.category]}</div></div>
+          </div>
+          <span class="bdg ${scc.cls}"><i class="ti ${scc.ico}" style="font-size:10px;"></i>${scc.lbl}</span>
+        </div>
+        <div class="dv"></div>
+        <div class="m2" style="font-size:13px;">
+          <div><div class="ml">Dernière maintenance</div><div>${fd(it.lastDate)}</div></div>
+          <div>
+            <div class="ml">Prochaine maintenance</div>
+            <div style="font-weight:500;color:${nxtc};">${fd(it.nextDate)}</div>
+            ${gcalBtnHtml}
+          </div>
+          ${veh&&it.km!=null?`<div><div class="ml">Kilométrage</div><div>${it.km.toLocaleString('fr-BE')} km</div></div>`:''}
+          ${it.plate&&veh?`<div><div class="ml">Plaque</div><div class="mvn">${it.plate}</div></div>`:''}
+          ${it.serial&&!veh?`<div style="grid-column:1/-1"><div class="ml">N° série</div><div class="mvn">${it.serial}</div></div>`:''}
+          ${it.vin&&veh?`<div style="grid-column:1/-1"><div class="ml">VIN</div><div class="mvn">${it.vin}</div></div>`:''}
+        </div>
+        ${it.notes?`<div class="nb">${it.notes}</div>`:''}
+        ${docs.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;">${docs.map(d=>`<button class="ab" onclick="viewDoc(${it.id},${d.id})" title="${d.name}" style="font-size:11px;max-width:180px;"><i class="ti ${d.type==='application/pdf'?'ti-file-type-pdf':'ti-photo'}" style="color:#9FE1CB;font-size:12px;"></i> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;display:inline-block;vertical-align:middle;">${d.name}</span></button>`).join('')}</div>`:''}
+        ${hc?`<div class="ctb"><i class="ti ti-user" style="font-size:13px;color:var(--tx3);"></i><span style="font-weight:500;">${it.cname||''}</span>${it.cphone?`<span style="color:var(--tx2);">${it.cphone}</span>`:''}${it.cemail?`<a href="mailto:${it.cemail}">${it.cemail}</a>`:''}</div>`:''}
+        <div class="dv"></div>
+        <div class="icf">
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span class="bdg ${it.contract?'b-ct':'b-nc'}"><i class="ti ${it.contract?'ti-file-check':'ti-file-x'}" style="font-size:10px;"></i>${it.contract?'Contrat':'Sans contrat'}</span>
+            <button class="ab" onclick="showHistory(${it.id})" title="Historique">
+              <i class="ti ti-history" style="font-size:13px;"></i>
+              ${hlen>0?`<span style="font-size:11px;">${hlen}</span>`:''}
+              ${hHasInv?`<i class="ti ti-paperclip" style="font-size:11px;color:#9FE1CB;"></i>`:''}
+            </button>
+          </div>
+          <div style="display:flex;gap:3px;">
+            ${!it.contract?`<button class="ab" onclick="draftMail(${it.id})" title="Ouvrir dans Gmail"><i class="ti ti-brand-gmail"></i></button>`:''}
+            <button class="ab" onclick="genFichePDF(${it.id})" title="Générer la fiche technique PDF"><i class="ti ti-file-description"></i></button>
+            <button class="ab" onclick="openF(${it.id})" title="Modifier"><i class="ti ti-edit"></i></button>
+            <button class="ab d" onclick="delItem(${it.id})" title="Supprimer"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+
+/* ══════════════════════════════════════
+   FICHE TECHNIQUE PDF
+══════════════════════════════════════ */
+function genFichePDF(id) {
+  const it = items.find(i => i.id === id);
+  if (!it) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, M = 16, CW = W - M * 2;
+  let y = 0;
+
+  const PAL = { maison: [93,202,165], moto: [240,153,123], voiture: [133,183,235] };
+  const col = PAL[it.category] || [150,150,150];
+
+  // Bandeau couleur haut
+  doc.setFillColor(...col);
+  doc.rect(0, 0, W, 18, 'F');
+
+  // Titre
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.setTextColor(255,255,255);
+  doc.text('FICHE TECHNIQUE', M, 11);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text(LBL[it.category].toUpperCase(), W - M, 11, { align:'right' });
+  y = 26;
+
+  // Photo + Nom (côte à côte si photo disponible)
+  const IMG_W = 38, IMG_H = 38, IMG_X = W - M - IMG_W;
+  if (it.image && it.image.startsWith('data:image')) {
+    try {
+      const fmt = it.image.includes('data:image/png') ? 'PNG' : 'JPEG';
+      doc.addImage(it.image, fmt, IMG_X, y - 6, IMG_W, IMG_H, undefined, 'FAST');
+      // Coin arrondi simulé via bordure
+      doc.setDrawColor(...col);
+      doc.setLineWidth(0.5);
+      doc.rect(IMG_X, y - 6, IMG_W, IMG_H);
+    } catch(e) { /* image ignorée si erreur */ }
+  }
+
+  // Nom de l'appareil
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(18);
+  doc.setTextColor(30,30,30);
+  doc.text(it.name, M, y);
+  y += 6;
+
+  // Date génération
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(8);
+  doc.setTextColor(140,140,140);
+  doc.text('Généré le ' + new Date().toLocaleDateString('fr-BE', {day:'2-digit',month:'long',year:'numeric'}), M, y);
+  y += 8;
+  // Si photo présente, s'assurer qu'on descend assez pour ne pas chevaucher
+  if (it.image && it.image.startsWith('data:image')) y = Math.max(y, 40);
+
+  // Ligne séparatrice
+  doc.setDrawColor(...col);
+  doc.setLineWidth(0.6);
+  doc.line(M, y, W - M, y);
+  y += 7;
+
+  // Fonction section
+  function section(title) {
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...col);
+    doc.text(title.toUpperCase(), M, y);
+    y += 1.5;
+    doc.setDrawColor(...col);
+    doc.setLineWidth(0.3);
+    doc.line(M, y, M + CW, y);
+    y += 5;
+    doc.setTextColor(30,30,30);
+  }
+
+  function row(label, value, right) {
+    if (!value) return;
+    const xL = right ? M + CW/2 + 2 : M;
+    if (!right) {
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(8);
+      doc.setTextColor(100,100,100);
+      doc.text(label, xL, y);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9);
+      doc.setTextColor(30,30,30);
+      doc.text(String(value), xL + 38, y);
+    } else {
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(8);
+      doc.setTextColor(100,100,100);
+      doc.text(label, xL, y);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9);
+      doc.setTextColor(30,30,30);
+      doc.text(String(value), xL + 38, y);
+    }
+  }
+
+  // Deux colonnes côte à côte
+  function twoRows(l1, v1, l2, v2) {
+    const yBefore = y;
+    if (v1) {
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(100,100,100);
+      doc.text(l1, M, y);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
+      doc.text(String(v1), M + 40, y);
+    }
+    if (v2) {
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(100,100,100);
+      doc.text(l2, M + CW/2, y);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
+      doc.text(String(v2), M + CW/2 + 40, y);
+    }
+    if (v1 || v2) y += 6;
+  }
+
+  function oneRow(label, value) {
+    if (!value) return;
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(100,100,100);
+    doc.text(label, M, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
+    doc.text(String(value), M + 40, y);
+    y += 6;
+  }
+
+  // ── Identification ──
+  section('Identification');
+  const veh = isVeh(it.category);
+  twoRows('Catégorie', LBL[it.category], 'Contrat', it.contract ? 'Oui' : 'Non');
+  if (veh) {
+    twoRows('Plaque', it.plate || '—', 'VIN / Châssis', it.vin || '—');
+  } else {
+    oneRow('N° de série', it.serial || '—');
+  }
+
+  // ── Maintenance ──
+  section('Maintenance');
+  twoRows('Dernière maintenance', fd(it.lastDate), 'Prochaine maintenance', fd(it.nextDate));
+  if (veh && it.km != null) {
+    oneRow('Kilométrage actuel', it.km.toLocaleString('fr-BE') + ' km');
+  }
+
+  // ── Contact ──
+  if (it.cname || it.cphone || it.cemail) {
+    section('Contact garage / technicien');
+    twoRows('Nom', it.cname || '—', 'Téléphone', it.cphone || '—');
+    oneRow('E-mail', it.cemail || '—');
+  }
+
+  // ── Notes ──
+  if (it.notes) {
+    section('Notes');
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
+    const lines = doc.splitTextToSize(it.notes, CW);
+    doc.text(lines, M, y);
+    y += lines.length * 5 + 4;
+  }
+
+  // ── Historique ──
+  const hist = (it.history || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (hist.length) {
+    section('Historique des entretiens');
+    // En-tête tableau
+    const cols = veh
+      ? [{lbl:'Date',x:M,w:28},{lbl:'Description',x:M+28,w:60},{lbl:'Type',x:M+88,w:22},{lbl:'KM',x:M+110,w:22},{lbl:'Coût',x:M+132,w:22},{lbl:'Prochaine',x:M+154,w:34}]
+      : [{lbl:'Date',x:M,w:28},{lbl:'Description',x:M+28,w:90},{lbl:'Coût',x:M+118,w:22},{lbl:'Prochaine',x:M+140,w:38}];
+    doc.setFillColor(245,245,245);
+    doc.rect(M, y-4, CW, 6, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(80,80,80);
+    cols.forEach(c => doc.text(c.lbl, c.x + 1, y));
+    y += 4;
+    doc.setLineWidth(0.2); doc.setDrawColor(200,200,200);
+    doc.line(M, y, M + CW, y);
+    y += 4;
+    hist.forEach((e, i) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(30,30,30);
+      const TLBL = {entretien:'Entretien',reparation:'Réparation',ct:'CT'};
+      if (veh) {
+        doc.text(fd(e.date), cols[0].x+1, y);
+        const desc = doc.splitTextToSize(e.description||'—', cols[1].w-2);
+        doc.text(desc[0], cols[1].x+1, y);
+        doc.text(TLBL[e.type||'entretien']||'', cols[2].x+1, y);
+        doc.text(e.km!=null ? e.km.toLocaleString('fr-BE') : '—', cols[3].x+1, y);
+        doc.text(e.cost!=null ? e.cost+'€' : '—', cols[4].x+1, y);
+        doc.text(fd(e.nextDate), cols[5].x+1, y);
+      } else {
+        doc.text(fd(e.date), cols[0].x+1, y);
+        const desc = doc.splitTextToSize(e.description||'—', cols[1].w-2);
+        doc.text(desc[0], cols[1].x+1, y);
+        doc.text(e.cost!=null ? e.cost+'€' : '—', cols[2].x+1, y);
+        doc.text(fd(e.nextDate), cols[3].x+1, y);
+      }
+      y += 6;
+      if (i < hist.length-1) { doc.setDrawColor(230,230,230); doc.line(M, y-2, M+CW, y-2); }
+    });
+    y += 3;
+  }
+
+  // ── Documents ──
+  const docs = it.docs || [];
+  if (docs.length) {
+    section('Documents techniques joints');
+    docs.forEach(d => {
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(30,30,30);
+      doc.text('• ' + d.name, M + 2, y);
+      y += 5;
+    });
+    y += 2;
+  }
+
+  // Pied de page
+  doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(180,180,180);
+  doc.text('Suivi Maintenance — Geenen / Genicot · Rue Mont-Plaisir 25, 1430 Bierghes', W/2, 292, {align:'center'});
+
+  doc.save(`fiche-${it.name.replace(/\s+/g,'-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+function render(){renderStats();renderItems();}
+
+/* ══════════════════════════════════════
+   LOGIN
+══════════════════════════════════════ */
+const APP_PWD='Draina2012';
+function checkLogin(){
+  const val=document.getElementById('login-pwd').value;
+  if(val===APP_PWD){
+    sessionStorage.setItem('maint_auth','1');
+    document.getElementById('login-overlay').style.display='none';
+    document.getElementById('app-wrap').style.display='';
+    render();
+  } else {
+    const err=document.getElementById('login-err');
+    err.textContent='Mot de passe incorrect.';
+    document.getElementById('login-pwd').value='';
+    setTimeout(()=>{err.textContent='';},2500);
+  }
+}
+if(sessionStorage.getItem('maint_auth')==='1'){
+  document.getElementById('login-overlay').style.display='none';
+  document.getElementById('app-wrap').style.display='';
+  render();
+}
+</script>
+</body>
+</html>
