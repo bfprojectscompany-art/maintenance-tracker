@@ -919,7 +919,7 @@ function renderItems(){
 /* ══════════════════════════════════════
    FICHE TECHNIQUE PDF
 ══════════════════════════════════════ */
-function genFichePDF(id) {
+async function genFichePDF(id) {
   const it = items.find(i => i.id === id);
   if (!it) return;
   const { jsPDF } = window.jspdf;
@@ -929,6 +929,30 @@ function genFichePDF(id) {
 
   const PAL = { maison: [93,202,165], moto: [240,153,123], voiture: [133,183,235] };
   const col = PAL[it.category] || [150,150,150];
+
+  // Charger la photo en base64 (base64 directe ou URL externe)
+  let imgData = null;
+  if (it.image) {
+    if (it.image.startsWith('data:image')) {
+      imgData = it.image;
+    } else {
+      // URL externe → charger via canvas
+      try {
+        imgData = await new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const c = document.createElement('canvas');
+            c.width = img.naturalWidth; c.height = img.naturalHeight;
+            c.getContext('2d').drawImage(img, 0, 0);
+            resolve(c.toDataURL('image/jpeg', 0.85));
+          };
+          img.onerror = () => resolve(null);
+          img.src = it.image;
+        });
+      } catch(e) { imgData = null; }
+    }
+  }
 
   // Bandeau couleur haut
   doc.setFillColor(...col);
@@ -946,11 +970,10 @@ function genFichePDF(id) {
 
   // Photo + Nom (côte à côte si photo disponible)
   const IMG_W = 38, IMG_H = 38, IMG_X = W - M - IMG_W;
-  if (it.image && it.image.startsWith('data:image')) {
+  if (imgData) {
     try {
-      const fmt = it.image.includes('data:image/png') ? 'PNG' : 'JPEG';
-      doc.addImage(it.image, fmt, IMG_X, y - 6, IMG_W, IMG_H, undefined, 'FAST');
-      // Coin arrondi simulé via bordure
+      const fmt = imgData.includes('data:image/png') ? 'PNG' : 'JPEG';
+      doc.addImage(imgData, fmt, IMG_X, y - 6, IMG_W, IMG_H, undefined, 'FAST');
       doc.setDrawColor(...col);
       doc.setLineWidth(0.5);
       doc.rect(IMG_X, y - 6, IMG_W, IMG_H);
@@ -971,7 +994,7 @@ function genFichePDF(id) {
   doc.text('Généré le ' + new Date().toLocaleDateString('fr-BE', {day:'2-digit',month:'long',year:'numeric'}), M, y);
   y += 8;
   // Si photo présente, s'assurer qu'on descend assez pour ne pas chevaucher
-  if (it.image && it.image.startsWith('data:image')) y = Math.max(y, 40);
+  if (imgData) y = Math.max(y, 40);
 
   // Ligne séparatrice
   doc.setDrawColor(...col);
