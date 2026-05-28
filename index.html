@@ -1155,23 +1155,32 @@ function genFichePDF(id) {
   </div>
 </div>
 
-<script>
-window.onload = () => {
-  const imgs = document.querySelectorAll('img');
-  if (!imgs.length) { window.print(); return; }
-  let pending = imgs.length;
-  const tryPrint = () => { if (--pending <= 0) window.print(); };
-  imgs.forEach(img => {
-    if (img.complete && img.naturalWidth > 0) { tryPrint(); }
-    else { img.onload = tryPrint; img.onerror = tryPrint; }
-  });
-};
-<\/script>
 </body></html>`;
 
-  const w = window.open('','_blank','width=900,height=1100');
-  w.document.write(html);
-  w.document.close();
+  // Injecter dans la page courante — image déjà chargée, pas de popup, pas de CORS
+  const prev = document.getElementById('__fiche_print');
+  if (prev) prev.remove();
+  const wrap = document.createElement('div');
+  wrap.id = '__fiche_print';
+  wrap.innerHTML = html;
+  document.body.appendChild(wrap);
+
+  const ps = document.getElementById('__fiche_print_style') || document.createElement('style');
+  ps.id = '__fiche_print_style';
+  ps.textContent = `
+    @media print {
+      body > *:not(#__fiche_print) { display:none !important; }
+      #__fiche_print { display:block !important; position:static !important; }
+    }
+    #__fiche_print { display:none; }
+  `;
+  document.head.appendChild(ps);
+
+  // Attendre que la photo soit chargée
+  const img = wrap.querySelector('img');
+  const doPrint = () => { window.print(); setTimeout(()=>{ wrap.remove(); }, 500); };
+  if (img && !img.complete) { img.onload = doPrint; img.onerror = doPrint; }
+  else { doPrint(); }
 }
 
 function render(){renderStats();renderItems();}
