@@ -229,8 +229,8 @@ a{color:var(--tv);text-decoration:none;}
       <div><label for="m-next">Prochaine maintenance</label><input type="date" id="m-next"></div>
     </div>
     <div id="m-type-row" style="margin-top:8px;display:none;"><label for="m-type">Type d'événement</label><select id="m-type"><option value="entretien">Entretien</option><option value="reparation">Réparation</option><option value="ct">Contrôle technique</option></select></div>
-    <div style="margin-top:8px;"><label for="m-desc">Description des travaux</label><input type="text" id="m-desc" placeholder="Vidange, filtre, courroie..."></div>
-    <div style="margin-top:8px;"><label for="m-notes">Notes</label><textarea id="m-notes" rows="2" placeholder="Références pièces..."></textarea></div>
+    <div style="margin-top:8px;"><label for="m-desc">Description des travaux</label><textarea id="m-desc" rows="4" placeholder="Vidange, filtre, courroie..."></textarea></div>
+    <div style="margin-top:8px;"><label for="m-notes">Notes</label><textarea id="m-notes" rows="1" placeholder="Références pièces..."></textarea></div>
     <div class="stit">Facture</div>
     <div class="fg">
       <div>
@@ -808,13 +808,12 @@ function parseInvoiceText(text) {
     }
   }
 
-  // ── Montant total ── (chercher "total", "montant", "à payer", puis le montant le plus proche)
-  const totalPatterns = [
-    /(?:total|montant|à payer|net à payer|total ttc|total tva|montant ttc)[^\d]*(\d[\d\s]*[,\.]\d{2})/i,
-    /(\d[\d\s]*[,\.]\d{2})\s*€/,
-    /€\s*(\d[\d\s]*[,\.]\d{2})/,
+  // ── Montant TTC (priorité absolue sur HTVA) ──
+  const ttcPatterns = [
+    /(?:total\s*ttc|montant\s*ttc|net\s*à\s*payer|à\s*payer|total\s*à\s*régler|bedrag\s*incl|totaal\s*incl)[^\d]*(\d[\d\s]*[,\.]\d{2})/i,
+    /(\d[\d\s]*[,\.]\d{2})\s*(?:€|EUR)(?!\s*(?:htva|excl|hors))/i,
   ];
-  for (const pat of totalPatterns) {
+  for (const pat of ttcPatterns) {
     const m = t.match(pat);
     if (m) {
       const raw = m[1].replace(/\s/g,'').replace(',','.');
@@ -822,11 +821,11 @@ function parseInvoiceText(text) {
       if (!isNaN(val) && val > 0 && val < 100000) { result.cost = val; break; }
     }
   }
-  // Si plusieurs montants trouvés, prendre le plus grand (= total)
+  // Fallback : prendre le montant le plus élevé (souvent le TTC)
   if (!result.cost) {
     const allAmounts = [...t.matchAll(/(\d[\d\s]{0,6}[,\.]\d{2})/g)]
       .map(m => parseFloat(m[1].replace(/\s/g,'').replace(',','.')))
-      .filter(v => !isNaN(v) && v > 0 && v < 100000);
+      .filter(v => !isNaN(v) && v > 10 && v < 100000);
     if (allAmounts.length) result.cost = Math.max(...allAmounts);
   }
 
@@ -837,11 +836,12 @@ function parseInvoiceText(text) {
     if (km > 100 && km < 1000000) result.km = km;
   }
 
-  // ── Description ── (lignes qui contiennent des mots techniques)
-  const techWords = /vidange|huile|filtre|frein|plaquette|courroie|batterie|pneu|révision|entretien|contrôle|inspecti|diagnostic|réparation|valve|bougie|distribution|embrayage|amortisseur|radiateur|thermostat|climatisation|ABS|ESC|service|maintenance|kit|remplacement|nettoyage|transmission|boîte|moteur/i;
-  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>5);
-  const descLines = lines.filter(l => techWords.test(l)).slice(0,3);
-  if (descLines.length) result.description = descLines.join(', ').substring(0,120);
+  // ── Description ── lignes techniques, en excluant les lignes parasites
+  const techWords = /vidange|huile|filtre|frein|plaquette|courroie|batterie|pneu|révision|entretien|contrôle|inspect|diagnostic|réparation|valve|bougie|distribution|embrayage|amortisseur|radiateur|thermostat|climatisation|ABS|ESC|service|maintenance|kit|remplacement|nettoyage|transmission|boîte|moteur|révision|graissage|liquide|coolant|brake|oil|chain|tyre|belt|spark/i;
+  const junkWords = /iban|bic|btw|tva|vat|swift|e-mail|@|tél|tel\.|gsm|fax|rue|avenue|chaussée|pavé|straat|n°|numéro|siret|rpe|bce|cbe|\d{4}\s\d{4}|\d{2}\.\d{2}\.\d{3}|www\.|http|facture\s*n|invoice\s*n|bon\s*de|devis|référence|ref\s*:|client\s*:|date\s*:/i;
+  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>4);
+  const descLines = lines.filter(l => techWords.test(l) && !junkWords.test(l)).slice(0,5);
+  if (descLines.length) result.description = descLines.join('\n').substring(0,300);
 
   // ── Garage / fournisseur ── (souvent en haut du document, 1ères lignes non vides)
   const firstLines = lines.slice(0,6).filter(l=>l.length>3&&!/^\d/.test(l)&&!/facture|invoice|bon de/i.test(l));
