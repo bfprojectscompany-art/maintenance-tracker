@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Suivi Maintenance — Geenen / Genicot</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#111110;--bg2:#1a1a18;--bg3:#222220;--bg4:#2a2a28;--tx:#e8e8e6;--tx2:#9a9a96;--tx3:#5a5a56;--bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.14);--bd3:rgba(255,255,255,0.22);--r:8px;--rl:12px;--tm:#5DCAA5;--tmbg:#04342C;--tmdk:#9FE1CB;--tc:#F0997B;--tcbg:#4A1B0C;--tcdk:#F5C4B3;--tv:#85B7EB;--tvbg:#042C53;--tvdk:#B5D4F4;}
@@ -237,9 +239,13 @@ a{color:var(--tv);text-decoration:none;}
         <div id="m-inv-prev" class="inv-prev-wrap"><img id="m-inv-img" alt=""></div>
         <div id="m-inv-info" style="font-size:12px;color:var(--tx2);margin-top:4px;"></div>
       </div>
-      <div style="display:flex;align-items:flex-end;">
-        <button class="bs" id="m-inv-clear" onclick="clearInvoice()" style="font-size:12px;display:none;"><i class="ti ti-x"></i> Supprimer la facture</button>
+      <div style="display:flex;flex-direction:column;gap:6px;justify-content:flex-end;">
+        <button class="bs" id="m-inv-clear" onclick="clearInvoice()" style="font-size:12px;display:none;"><i class="ti ti-x"></i> Supprimer</button>
+        <button class="bp" id="m-ocr-btn" onclick="analyzeInvoice()" style="font-size:12px;display:none;justify-content:center;"><i class="ti ti-scan" id="m-ocr-icon"></i> <span id="m-ocr-label">Analyser la facture</span></button>
       </div>
+    </div>
+    <div id="m-ocr-result" style="display:none;margin-top:8px;padding:9px 12px;background:#04342C;border:1px solid #5DCAA5;border-radius:var(--r);font-size:12px;color:#9FE1CB;">
+      <i class="ti ti-sparkles"></i> <strong>Champs pré-remplis</strong> — vérifiez avant d'enregistrer.
     </div>
     <div style="display:flex;gap:8px;margin-top:.85rem;justify-content:flex-end;">
       <button class="bs" onclick="closeAddMaint()">Annuler</button>
@@ -711,8 +717,153 @@ function showInvoicePreview(inv){
   if(inv.type.startsWith('image/')){document.getElementById('m-inv-img').src=inv.data;document.getElementById('m-inv-prev').style.display='block';}
   document.getElementById('m-inv-info').textContent=inv.name+' — '+Math.round(inv.data.length*0.75/1024)+' KB';
   document.getElementById('m-inv-clear').style.display='inline-flex';
+  document.getElementById('m-ocr-btn').style.display='inline-flex';
+  document.getElementById('m-ocr-result').style.display='none';
 }
-function clearInvoice(){invoiceData=null;document.getElementById('m-inv-file').value='';document.getElementById('m-inv-prev').style.display='none';document.getElementById('m-inv-info').textContent='';document.getElementById('m-inv-clear').style.display='none';}
+function clearInvoice(){invoiceData=null;document.getElementById('m-inv-file').value='';document.getElementById('m-inv-prev').style.display='none';document.getElementById('m-inv-info').textContent='';document.getElementById('m-inv-clear').style.display='none';document.getElementById('m-ocr-btn').style.display='none';document.getElementById('m-ocr-result').style.display='none';}
+/* ══════════════════════════════════════
+   OCR — ANALYSE FACTURE
+══════════════════════════════════════ */
+async function analyzeInvoice() {
+  if (!invoiceData) return;
+  const btn = document.getElementById('m-ocr-btn');
+  const lbl = document.getElementById('m-ocr-label');
+  const ico = document.getElementById('m-ocr-icon');
+  btn.disabled = true;
+  ico.className = 'ti ti-loader-2';
+  ico.style.animation = 'spin 1s linear infinite';
+  lbl.textContent = 'Analyse en cours…';
+
+  if (!document.getElementById('__ocr_spin_style')) {
+    const s = document.createElement('style');
+    s.id = '__ocr_spin_style';
+    s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(s);
+  }
+
+  try {
+    let text = '';
+
+    if (invoiceData.type === 'application/pdf') {
+      // PDF digital → extraction texte directe via PDF.js
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const b64 = invoiceData.data.split(',')[1];
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const content = await page.getTextContent();
+        text += content.items.map(i => i.str).join(' ') + '\n';
+      }
+    } else {
+      // Image → Tesseract OCR
+      lbl.textContent = 'OCR en cours…';
+      const result = await Tesseract.recognize(invoiceData.data, 'fra+eng', {});
+      text = result.data.text;
+    }
+
+    // ── Parser le texte extrait ──
+    const parsed = parseInvoiceText(text);
+    applyParsedFields(parsed, text);
+
+    ico.style.animation = '';
+    ico.className = 'ti ti-check';
+    lbl.textContent = 'Analysé !';
+    document.getElementById('m-ocr-result').style.display = 'block';
+  } catch(e) {
+    ico.style.animation = '';
+    ico.className = 'ti ti-alert-circle';
+    lbl.textContent = 'Erreur analyse';
+    console.error('OCR error:', e);
+  }
+  btn.disabled = false;
+}
+
+function parseInvoiceText(text) {
+  const t = text.replace(/\s+/g, ' ');
+  const result = {};
+
+  // ── Date ── (DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY, YYYY-MM-DD)
+  const datePatterns = [
+    /\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})\b/,
+    /\b(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})\b/,
+    /\b(\d{1,2})\s+(janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|december)\s+(\d{4})\b/i,
+  ];
+  const monthMap = {janvier:1,février:2,fevrier:2,mars:3,avril:4,mai:5,juin:6,juillet:7,août:8,aout:8,septembre:9,octobre:10,novembre:11,décembre:12,december:12};
+  for (const pat of datePatterns) {
+    const m = t.match(pat);
+    if (m) {
+      let y, mo, d;
+      if (isNaN(m[2]) && monthMap[m[2].toLowerCase()]) {
+        d = m[1].padStart(2,'0'); mo = String(monthMap[m[2].toLowerCase()]).padStart(2,'0'); y = m[3];
+      } else if (m[1].length === 4) {
+        y = m[1]; mo = m[2].padStart(2,'0'); d = m[3].padStart(2,'0');
+      } else {
+        d = m[1].padStart(2,'0'); mo = m[2].padStart(2,'0'); y = m[3];
+      }
+      result.date = `${y}-${mo}-${d}`;
+      break;
+    }
+  }
+
+  // ── Montant total ── (chercher "total", "montant", "à payer", puis le montant le plus proche)
+  const totalPatterns = [
+    /(?:total|montant|à payer|net à payer|total ttc|total tva|montant ttc)[^\d]*(\d[\d\s]*[,\.]\d{2})/i,
+    /(\d[\d\s]*[,\.]\d{2})\s*€/,
+    /€\s*(\d[\d\s]*[,\.]\d{2})/,
+  ];
+  for (const pat of totalPatterns) {
+    const m = t.match(pat);
+    if (m) {
+      const raw = m[1].replace(/\s/g,'').replace(',','.');
+      const val = parseFloat(raw);
+      if (!isNaN(val) && val > 0 && val < 100000) { result.cost = val; break; }
+    }
+  }
+  // Si plusieurs montants trouvés, prendre le plus grand (= total)
+  if (!result.cost) {
+    const allAmounts = [...t.matchAll(/(\d[\d\s]{0,6}[,\.]\d{2})/g)]
+      .map(m => parseFloat(m[1].replace(/\s/g,'').replace(',','.')))
+      .filter(v => !isNaN(v) && v > 0 && v < 100000);
+    if (allAmounts.length) result.cost = Math.max(...allAmounts);
+  }
+
+  // ── Kilométrage ──
+  const kmMatch = t.match(/(\d[\d\s\.]*)\s*(?:km|kilomètre|kilométrage|kms)/i);
+  if (kmMatch) {
+    const km = parseInt(kmMatch[1].replace(/[\s\.]/g,''));
+    if (km > 100 && km < 1000000) result.km = km;
+  }
+
+  // ── Description ── (lignes qui contiennent des mots techniques)
+  const techWords = /vidange|huile|filtre|frein|plaquette|courroie|batterie|pneu|révision|entretien|contrôle|inspecti|diagnostic|réparation|valve|bougie|distribution|embrayage|amortisseur|radiateur|thermostat|climatisation|ABS|ESC|service|maintenance|kit|remplacement|nettoyage|transmission|boîte|moteur/i;
+  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>5);
+  const descLines = lines.filter(l => techWords.test(l)).slice(0,3);
+  if (descLines.length) result.description = descLines.join(', ').substring(0,120);
+
+  // ── Garage / fournisseur ── (souvent en haut du document, 1ères lignes non vides)
+  const firstLines = lines.slice(0,6).filter(l=>l.length>3&&!/^\d/.test(l)&&!/facture|invoice|bon de/i.test(l));
+  if (firstLines.length) result.garage = firstLines[0].substring(0,60);
+
+  return result;
+}
+
+function applyParsedFields(parsed, rawText) {
+  if (parsed.date) document.getElementById('m-date').value = parsed.date;
+  if (parsed.cost != null) document.getElementById('m-cost').value = parsed.cost;
+  if (parsed.km != null) {
+    const kmEl = document.getElementById('m-km');
+    if (kmEl && kmEl.closest('#m-km-row').style.display !== 'none') kmEl.value = parsed.km;
+  }
+  if (parsed.description) document.getElementById('m-desc').value = parsed.description;
+  if (parsed.garage) {
+    const cur = document.getElementById('m-notes').value;
+    if (!cur) document.getElementById('m-notes').value = 'Garage : ' + parsed.garage;
+  }
+}
+
 function saveMaint(){
   const date=document.getElementById('m-date').value;if(!date){alert('Date obligatoire');return;}
   const it=items.find(i=>i.id===histItemId);if(!it)return;if(!it.history)it.history=[];
